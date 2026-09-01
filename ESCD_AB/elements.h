@@ -32,11 +32,11 @@
 #define SWITCH_OFF                6     // TOGGLE ELEMENTS IS OFF
 #define SWITCH_ON                 7     // TOGGLE ELEMENTS IS ON
 
-#define FLOOR_TILE                0
-#define FLOOR_BOX                 1
-#define FLOOR_SPIKE               2
-#define FLOOR_PIRAMIDE            3
-#define FLOOR_PIT                 4
+#define FLOOR_NORMAL              0     
+#define FLOOR_BOX                 1     // (not changeable by switch) and will hurt the player - bullet can NOT pass
+#define FLOOR_SPIKE               2     // (not changeable by switch)- bullet can NOT pass
+#define FLOOR_PIRAMIDE            3     // (not changeable by switch) - bullet removes piramide
+#define FLOOR_PIT                 4     // (can be removed by switch) - bullet can pass
 
 #define SCORE_BLACK_CARD          100
 #define SCORE_WHITE_CARD          10
@@ -69,7 +69,7 @@ struct Element
 // create 9 places for the elements to be stored
 // place 0 ENEMY_ONE      4 different types
 // place 1 ENEMY_TWO      4 different types
-// place 2 OBJECT         . different types
+// place 2 OBJECT         8 different types
 // place 3 FLOOR_ONE      4 different types
 // place 4 FLOOR_TWO      4 different types
 // place 5 FLOOR_THREE    4 different types

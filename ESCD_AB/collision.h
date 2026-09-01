@@ -51,34 +51,34 @@ void setPlayerWalkingThroughDoor()
   switch (player.characteristics & 0b00000011)
   {
     case NORTH:
-      if ((player.isOnTile == TILE_INFRONT_DOOR_NORTH) &&                                                         // droid is on the tile for a door
+      if ((player.isOnTile == TILE_INFRONT_DOOR_NORTH) &&                                   // droid is on the tile for a door
           (bitRead(stageRoom[currentRoom].doorsClosedActive, NORTH_DOOR_EXISTS)) &&         // the door exists in this room         
           (!bitRead(stageRoom[currentRoom].doorsClosedActive, NORTH_DOOR_IS_CLOSSED))       // the door is not closed
          )
       {
-        bitSet (player.characteristics, DROID_GOES_THROUGH_DOOR_AT_BIT_5);                                                 // if all above, set the droid is walking through the door
+        bitSet (player.characteristics, DROID_GOES_THROUGH_DOOR_AT_BIT_5);                 // if all above, set the droid is walking through the door
         player.x = translateTileToX(2);
         player.y = translateTileToY(2) + currentRoomY;
       }
       break;
     case EAST:
-      if ((player.isOnTile == TILE_INFRONT_DOOR_EAST) &&                                                        // droid is on the tile for a door
+      if ((player.isOnTile == TILE_INFRONT_DOOR_EAST) &&                                    // droid is on the tile for a door
           (bitRead(stageRoom[currentRoom].doorsClosedActive, EAST_DOOR_EXISTS)) &&          // the door exists in this room
           (!bitRead(stageRoom[currentRoom].doorsClosedActive, EAST_DOOR_IS_CLOSSED))        // the door is not closed
          )
       {
-        bitSet (player.characteristics, DROID_GOES_THROUGH_DOOR_AT_BIT_5);                                                 // if all above, set the droid is walking through the door
+        bitSet (player.characteristics, DROID_GOES_THROUGH_DOOR_AT_BIT_5);                  // if all above, set the droid is walking through the door
         player.x = translateTileToX(10);
         player.y = translateTileToY(10) + currentRoomY;
       }
       break;
     case SOUTH:
-      if ((player.isOnTile == TILE_INFRONT_DOOR_SOUTH) &&                                                        // droid is on the tile for a door
+      if ((player.isOnTile == TILE_INFRONT_DOOR_SOUTH) &&                                   // droid is on the tile for a door
           (bitRead(stageRoom[currentRoom].doorsClosedActive, SOUTH_DOOR_EXISTS)) &&         // the door exists in this room
           (!bitRead(stageRoom[currentRoom].doorsClosedActive, SOUTH_DOOR_IS_CLOSSED))       // the door is not closed
          )
       {
-        bitSet (player.characteristics, DROID_GOES_THROUGH_DOOR_AT_BIT_5);                                                 // if all above, set the droid is walking through the door
+        bitSet (player.characteristics, DROID_GOES_THROUGH_DOOR_AT_BIT_5);                  // if all above, set the droid is walking through the door
         player.x = translateTileToX(22);
         player.y = translateTileToY(22) + currentRoomY;
       }
@@ -210,22 +210,12 @@ void checkObjectTypeAndAct()
       clearElement();                                //remove the chip from the room
       scorePlayer += SCORE_CHIP;
       break;
-    case TELEPORT:          // TELEPORT
-      //bitSet(player.characteristics,DROID_TRANSPORTING_AT_BIT_7);
-      //gameState = STATE_GAME_TRANSPORTING;
-      break;
-    case SWITCH_OFF:        // SWITCH OFF
-      break;
-    case SWITCH_ON:          // SWITCH ON
-      break;
   }
 }
 
 
 void decideOnCollision()
 {
-  //Serial.print("testing : ");
-  //Serial.print(testingTile);
   switch (currentlyOnTestingTile)
   {
     case ENEMY_ONE:
@@ -233,9 +223,7 @@ void decideOnCollision()
     case ENEMY_TWO:
       break;
     case OBJECT:
-      //Serial.print(" switching");
       checkObjectTypeAndAct();
-      //itemsOrder[testingTile + ITEMS_ORDER_TILES_START] = 0;
       break;
     case FLOOR_ONE:
       break;
@@ -250,6 +238,7 @@ void decideOnCollision()
 
   }
 }
+
 
 
 #endif

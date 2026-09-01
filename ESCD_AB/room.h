@@ -13,6 +13,7 @@
 #define TILE_INFRONT_DOOR_EAST        10
 #define TILE_INFRONT_DOOR_SOUTH       22
 #define TILE_INFRONT_DOOR_WEST        14
+#define TILE_IN_MIDDLE                12
 
 #define NORTH_DOOR_EXISTS             NORTH + UPPERBIT_OFFSET
 #define NORTH_DOOR_IS_CLOSSED         NORTH
@@ -55,7 +56,8 @@ struct Room {
     byte elementsActive;
     byte roomToTransportTo;
     byte roomNumberInfluencing;
-    byte elementInfluenced;
+    byte roomNumberFromInfluencer;
+    byte elementsInfluenced;
 
     void set()
     {
@@ -92,25 +94,35 @@ struct Room {
       //                    └--------> NOT USED
 
       roomNumberInfluencing = 0b00000000;
-      //                        |||||||└->  \
-      //                        ||||||└-->   |
-      //                        |||||└--->   | these 6 bits are used for the roomnumber where the elements are influenced
-      //                        ||||└---->   |
-      //                        |||└----->   |
-      //                        ||└------>  /
-      //                        |└-------> RESERVED FOR SWITCH (0 = OFF / 1 = ON)
-      //                        └--------> NOT USED
+      //                        |||||||└->0  \
+      //                        ||||||└-->1   |
+      //                        |||||└--->2   | these 6 bits are used for the roomnumber where the elements are influenced
+      //                        ||||└---->3   |
+      //                        |||└----->4   |
+      //                        ||└------>5  /
+      //                        |└------->6 NOT USED
+      //                        └-------->7 NOT USED
 
-      elementInfluenced = 0b00000000;
-      //                    ||||||||
-      //                    |||||||└->  7 => 0 FLOOR  5 INFLUENCED (0 = false / 1 = true)
-      //                    ||||||└-->  6 => 1 FLOOR  4 INFLUENCED (0 = false / 1 = true)
-      //                    |||||└--->  5 => 2 FLOOR  3 INFLUENCED (0 = false / 1 = true)
-      //                    ||||└---->  4 => 3 FLOOR  2 INFLUENCED (0 = false / 1 = true)
-      //                    |||└----->  3 => 4 FLOOR  1 INFLUENCED (0 = false / 1 = true)
-      //                    ||└------>  2 => 5 OBJECT 3 INFLUENCED (0 = false / 1 = true)
-      //                    |└------->  1 => 6 ENEMY  2 INFLUENCED (0 = false / 1 = true)
-      //                    └-------->  0 => 7 ENEMY  1 INFLUENCED (0 = false / 1 = true)
+      roomNumberFromInfluencer = 0b00000000;
+      //                           |||||||└->0  \
+      //                           ||||||└-->1   |
+      //                           |||||└--->2   | these 6 bits are used for the roomnumber where the elements are influenced
+      //                           ||||└---->3   |
+      //                           |||└----->4   |
+      //                           ||└------>5  /
+      //                           |└------->6 NOT USED
+      //                           └-------->7 NOT USED
+
+      elementsInfluenced = 0b00000000;
+      //                     ||||||||
+      //                     |||||||└->0 FLOOR  1 INFLUENCED (0 = false / 1 = true)
+      //                     ||||||└-->1 FLOOR  2 INFLUENCED (0 = false / 1 = true)
+      //                     |||||└--->2 FLOOR  3 INFLUENCED (0 = false / 1 = true)
+      //                     ||||└---->3 FLOOR  4 INFLUENCED (0 = false / 1 = true)
+      //                     |||└----->4 FLOOR  5 INFLUENCED (0 = false / 1 = true)
+      //                     ||└------>5 ENEMY  1 INFLUENCED (0 = false / 1 = true)
+      //                     |└------->6 ENEMY  2 INFLUENCED (0 = false / 1 = true)
+      //                     └-------->7 OBJECT 3 INFLUENCED (0 = false / 1 = true)
     }
 };
 
@@ -119,8 +131,12 @@ Room stageRoom[MAX_AMOUNT_OF_ROOMS];
 
 void buildRooms(byte currentLevel)
 {
+  byte amountOfRooms = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][AMOUNT_OF_ROOMS_AT_BYTE]);
+  int transportDataAtByte = ROOMS_DATA_START_AT_BYTE + (BYTES_USED_FOR_EVERY_ROOM * amountOfRooms);
+  int influenceDataAtByte = transportDataAtByte + pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][AMOUNT_OF_TRANSPORTERS_AT_BYTE]);
   byte transporterCounter = 0;
-  for (byte roomNumber = 0; roomNumber < pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][AMOUNT_OF_ROOMS_AT_BYTE]); roomNumber++)
+  byte influenceDataCounter = 0;
+  for (byte roomNumber = 0; roomNumber < amountOfRooms; roomNumber++)
   {
     // clear all info
     stageRoom[roomNumber].set();
@@ -136,32 +152,23 @@ void buildRooms(byte currentLevel)
       { //0b76543210
         bitSet (stageRoom[roomNumber].elementsActive, 7 - i);    //0b12345678
       }
-      //Serial.print(pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + i + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]), BIN);
-      //Serial.print(" : ");
     }
-    //Serial.println();
-    //Serial.println(stageRoom[roomNumber].elementsActive, BIN);
 
     // Third thing to do is to set the transporter data in the correct room
     if ((pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + OBJECT + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]) & 0b00000111) == TELEPORT)
     {
-      byte transportDataAtByte = ROOMS_DATA_START_AT_BYTE + (BYTES_USED_FOR_EVERY_ROOM * pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][AMOUNT_OF_ROOMS_AT_BYTE]));
       stageRoom[roomNumber].roomToTransportTo = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][transportDataAtByte + transporterCounter]);
       transporterCounter++;
-      //Serial.print(transportDataAtByte);
-      //Serial.print(" : ");
-      //Serial.print(roomNumber);
-      //Serial.print(" : ");
-      //Serial.println(stageRoom[roomNumber].roomToTransportTo);
     }
-    // Fourth thing to do is to set in which room an element is influenced
+    // Fourth thing to do is to set in which room an element is influenced, where the influencer is and what elementes are influenced
+    if ((pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + OBJECT + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]) & 0b00000111) > TELEPORT)
+    {
+      stageRoom[roomNumber].roomNumberInfluencing = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][influenceDataAtByte + influenceDataCounter]);
+      stageRoom[roomNumber].roomNumberFromInfluencer = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][influenceDataAtByte + influenceDataCounter + 1]);
+      stageRoom[roomNumber].elementsInfluenced = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][influenceDataAtByte + influenceDataCounter + 2]);
+      influenceDataCounter += 3;
+    }
   }
-
-
-  //stageRoom[roomNumber].roomNumberInfluencing = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ROOMS_DATA_START_AT_BYTE + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]);
-
-  // And finally lets set what elements will be influenced in the room that has been set above
-  //Serial.println();
 }
 
 
@@ -244,7 +251,6 @@ void enterRoom(byte roomNumber, byte currentLevel)
 
     }
   }
-  //Serial.println();
 }
 
 byte transportToRoom (byte roomNumber)
@@ -255,7 +261,7 @@ byte transportToRoom (byte roomNumber)
 
 byte goToRoom(byte roomNumber, byte currentLevel)
 {
-  // we now which door the player goes through by the direction the droid is facing
+  // we know which door the player goes through by the direction the droid is facing
   byte door = player.characteristics & 0b00000011;
   return (pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][DOORS_DATA_START_AT_BYTE + door + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]) >> 2);
 };
@@ -269,16 +275,16 @@ byte goToTile(byte roomNumber, byte currentLevel)
   switch (doorGoingTo)
   {
     case NORTH:
-      return 2;
+      return TILE_INFRONT_DOOR_NORTH;
       break;
     case EAST:
-      return 10;
+      return TILE_INFRONT_DOOR_EAST;
       break;
     case SOUTH:
-      return 22;
+      return TILE_INFRONT_DOOR_SOUTH;
       break;
     case WEST:
-      return 14;
+      return TILE_INFRONT_DOOR_WEST;
       break;
   }
 }
@@ -287,18 +293,19 @@ int setCurrentRoomY(byte currentTile)
 {
   switch (currentTile)
   {
-    case 2:
+    case TILE_INFRONT_DOOR_NORTH:
       return -9;
       break;
-    case 10:
+    case TILE_INFRONT_DOOR_EAST:
       return -9;
       break;
-    case 14:
+    case TILE_INFRONT_DOOR_SOUTH:
       return -35;
       break;
-    case 22:
+    case TILE_INFRONT_DOOR_WEST:
       return -35;
       break;
+    
   }
 }
 
@@ -607,14 +614,6 @@ void checkOrderOfObjects(byte roomNumber, byte currentLevel)
   {
    if (bitRead(stageRoom[currentRoom].elementsActive, 7 - i))itemsOrder[tileFromXY(elements[i].x, elements[i].y) + ITEMS_ORDER_TILES_START] = i;
   }
-  /*
-    for (byte i = 0; i < SIZE_OF_ITEMSORDER; i++)
-    {
-    Serial.print(itemsOrder[i]);
-    Serial.print(" : ");
-    }
-    Serial.println();
-  */
 }
 
 void drawNumbers(byte x, byte y, unsigned long numbers, byte fontType)

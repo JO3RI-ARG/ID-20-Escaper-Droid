@@ -94,15 +94,27 @@ void checkInputs()
         }
         // TRANSPORT
         // Has currentRoom a transporter
-        if ((elements[2].characteristics & 0b00000111)==TELEPORT)
+        if ((elements[OBJECT].characteristics & 0b00000111)==TELEPORT)
         {
-          if (((elements[2].characteristics & 0b11111000)>>3) == (player.isOnTile - 5))
+          if (((elements[OBJECT].characteristics & 0b11111000)>>3) == (player.isOnTile - 5))
           {
             bitSet(player.characteristics,DROID_TRANSPORTING_AT_BIT_7);
             gameState = STATE_GAME_TRANSPORTING;
           }
         }
         // SWITCH ON/OFF
+        // Has currentRoom a Switch ON/OFF
+        if (((elements[OBJECT].characteristics & 0b00000111) > 0b00000101))
+        {
+          if (((elements[OBJECT].characteristics & 0b11111000)>>3) == (player.isOnTile - 5))
+          {
+            // toggle the switch
+            bitToggle(elements[OBJECT].characteristics,0); // we need to keep to switch toggled when leaving the room
+            byte inWhatRoomToSwitch = stageRoom[currentRoom].roomNumberInfluencing;
+            byte elementsToSwitch = stageRoom[currentRoom].elementsInfluenced;
+            stageRoom[inWhatRoomToSwitch].elementsActive ^= elementsToSwitch;
+          }
+        }
         // SHOOT BULLET
         break;
       case EAST:
@@ -113,15 +125,25 @@ void checkInputs()
           playerChecksAndOpensLevelDoor(EAST);        // OPEN THE LEVEL DOOR IF DROID HAS A BLACK CARD
         }
         // TRANSPORT
-          if ((elements[2].characteristics & 0b00000111)==TELEPORT)
+        if ((elements[OBJECT].characteristics & 0b00000111)==TELEPORT)
         {
-          if (((elements[2].characteristics & 0b11111000)>>3)== (player.isOnTile - 1))
+          if (((elements[OBJECT].characteristics & 0b11111000)>>3)== (player.isOnTile - 1))
           {
             bitSet(player.characteristics,DROID_TRANSPORTING_AT_BIT_7);
             gameState = STATE_GAME_TRANSPORTING;
           }
         }
         // SWITCH ON/OFF
+        if (((elements[OBJECT].characteristics & 0b00000111) > 0b00000101))
+        {
+          if (((elements[OBJECT].characteristics & 0b11111000)>>3) == (player.isOnTile - 1))
+          {
+            bitToggle(elements[OBJECT].characteristics,0); // we need to keep to switch toggled when leaving the room
+            byte inWhatRoomToSwitch = stageRoom[currentRoom].roomNumberInfluencing;
+            byte elementsToSwitch = stageRoom[currentRoom].elementsInfluenced;
+            stageRoom[inWhatRoomToSwitch].elementsActive ^= elementsToSwitch;
+          }
+        }
         // SHOOT BULLET
         break;
       case SOUTH:
@@ -132,15 +154,25 @@ void checkInputs()
           playerChecksAndOpensLevelDoor(SOUTH);        // OPEN THE LEVEL DOOR IF DROID HAS A BLACK CARD
         }
         // TRANSPORT
-           if ((elements[2].characteristics & 0b00000111)==TELEPORT)
+           if ((elements[OBJECT].characteristics & 0b00000111)==TELEPORT)
         {
-          if (((elements[2].characteristics & 0b11111000)>>3)== (player.isOnTile + 5))
+          if (((elements[OBJECT].characteristics & 0b11111000)>>3)== (player.isOnTile + 5))
           {
             bitSet(player.characteristics,DROID_TRANSPORTING_AT_BIT_7);
             gameState = STATE_GAME_TRANSPORTING;
           }
         }
         // SWITCH ON/OFF
+        if (((elements[OBJECT].characteristics & 0b00000111) > 0b00000101))
+        {
+          if (((elements[OBJECT].characteristics & 0b11111000)>>3) == (player.isOnTile + 5))
+          {
+            bitToggle(elements[OBJECT].characteristics,0); // we need to keep to switch toggled when leaving the room
+            byte inWhatRoomToSwitch = stageRoom[currentRoom].roomNumberInfluencing;
+            byte elementsToSwitch = stageRoom[currentRoom].elementsInfluenced;
+            stageRoom[inWhatRoomToSwitch].elementsActive ^= elementsToSwitch;
+          }
+        }
         // SHOOT BULLET
         break;
       case WEST:
@@ -151,15 +183,25 @@ void checkInputs()
           playerChecksAndOpensLevelDoor(WEST);        // OPEN THE LEVEL DOOR IF DROID HAS A BLACK CARD
         }
         // TRANSPORT
-           if ((elements[2].characteristics & 0b00000111)==TELEPORT)
+           if ((elements[OBJECT].characteristics & 0b00000111)==TELEPORT)
         {
-          if (((elements[2].characteristics & 0b11111000)>>3)== (player.isOnTile + 1))
+          if (((elements[OBJECT].characteristics & 0b11111000)>>3)== (player.isOnTile + 1))
           {
             bitSet(player.characteristics,DROID_TRANSPORTING_AT_BIT_7);
             gameState = STATE_GAME_TRANSPORTING;
           }
         }
         // SWITCH ON/OFF
+        if (((elements[OBJECT].characteristics & 0b00000111) > 0b00000101))
+        {
+          if (((elements[OBJECT].characteristics & 0b11111000)>>3) == (player.isOnTile + 1))
+          {
+            bitToggle(elements[OBJECT].characteristics,0); // we need to keep to switch toggled when leaving the room
+            byte inWhatRoomToSwitch = stageRoom[currentRoom].roomNumberInfluencing;
+            byte elementsToSwitch = stageRoom[currentRoom].elementsInfluenced;
+            stageRoom[inWhatRoomToSwitch].elementsActive ^= elementsToSwitch;
+          }
+        }
         // SHOOT BULLET
         break;
     }

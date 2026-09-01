@@ -10,40 +10,40 @@
 #define LEVEL_DOOR_DATA_START_AT_BYTE             3
 #define ROOMS_DATA_START_AT_BYTE                  4
 #define DOORS_DATA_START_AT_BYTE                  ROOMS_DATA_START_AT_BYTE + 1
-#define ELEMENTS_DATA_START_AT_BYTE               ROOMS_DATA_START_AT_BYTE + 5             
+#define ELEMENTS_DATA_START_AT_BYTE               ROOMS_DATA_START_AT_BYTE + 5            
 #define BYTES_USED_FOR_EVERY_ROOM                 13
 
 // ROOM ORDER OF TILES
-//              /\
-//             /  \
-//            / 00 \
-//           /\    /\
-//          /  \  /  \
-//         / 01 \/ 05 \
-//        /\    /\    /\
-//       /  \  /  \  /  \
-//      / 02 \/ 06 \/ 10 \
-//     /\    /\    /\    /\
-//    /  \  /  \  /  \  /  \
-//   / 03 \/ 07 \/ 11 \/ 15 \
-//  /\    /\    /\    /\    /\
-// /  \  /  \  /  \  /  \  /  \
-/// 04 \/ 08 \/ 12 \/ 16 \/ 20 \
-//\    /\    /\    /\    /\    /
-// \  /  \  /  \  /  \  /  \  /
-//  \/ 09 \/ 13 \/ 17 \/ 21 \/
-//   \    /\    /\    /\    /
-//    \  /  \  /  \  /  \  /
-//     \/ 14 \/ 18 \/ 22 \/
-//      \    /\    /\    /
-//       \  /  \  /  \  /
-//        \/ 19 \/ 23 \/
-//         \    /\    /
-//          \  /  \  /
-//           \/ 24 \/
-//            \    /
-//             \  /
-//              \/
+//                 /\
+//                /  \
+//               / 00 \
+//              /\    /\
+//             /  \  /  \
+//            / 01 \/ 05 \
+//            \    /\    /
+// NORTH       \  /  \  /         EAST
+//           02 \/ 06 \/ 10  
+//        /\    /\    /\    /\
+//       /  \  /  \  /  \  /  \
+//      / 03 \/ 07 \/ 11 \/ 15 \
+//     /\    /\    /\    /\    /\
+//    /  \  /  \  /  \  /  \  /  \
+//   / 04 \/ 08 \/ 12 \/ 16 \/ 20 \
+//   \    /\    /\    /\    /\    /
+//    \  /  \  /  \  /  \  /  \  /
+//     \/ 09 \/ 13 \/ 17 \/ 21 \/
+//      \    /\    /\    /\    /
+//       \  /  \  /  \  /  \  /
+//        \/ 14 \/ 18 \/ 22 \/
+//              /\    /\    
+// WEST        /  \  /  \         SOUTH
+//            / 19 \/ 23 \
+//            \    /\    /
+//             \  /  \  /
+//              \/ 24 \/
+//               \    /
+//                \  /
+//                 \/
 
 
 //const unsigned char PROGMEM centerOfTiles[][2] =
@@ -66,74 +66,103 @@
 //  |└------->   |
 //  └-------->  / 
 
+
+// ALL THE DATA FOR EACH ROOM AND EACH ROOM HAS 13 BYTES
 // DOORS         NORTH        EAST       SOUTH        WEST       ENEMY1      ENEMY2     OBJECT3     FLOOR1      FLOOR2      FLOOR3      FLOOR4      FLOOR5
 //0b11001110, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000,
-//  ||||||||    ||||||||                                                                ||||||||
-//  ||||||||    ||||||||                                                                |||||||└->  \   these 3 bits are used to determine kind of sprite used for the object
-//  ||||||||    ||||||||                                                                ||||||└-->   |  0 = black card; 1 = white card; 2 = battery; 3 = bullet; 4 = chip; 5
-//  ||||||||    ||||||||                                                                |||||└--->  /
-//  ||||||||    ||||||||                                                                ||||└---->  \
-//  ||||||||    ||||||||                                                                |||└----->   |
-//  ||||||||    ||||||||                                                                ||└------>   |  these 5 bits are used to determine on what floor tile the object is
-//  ||||||||    ||||||||                                                                |└------->   |
-//  ||||||||    ||||||||                                                                └-------->  /   if all 8 bits == 0 => no object
+//  ||||||||    ||||||||                                        ||||||||                ||||||||    ||||||||
+//  ||||||||    ||||||||                                        ||||||||                ||||||||    |||||||└->0  \  these 3 bits are used to determine kind of sprite used for the floor
+//  ||||||||    ||||||||                                        ||||||||                ||||||||    ||||||└-->1   | 0 = none; 1 = box; 2 = spike; 3 = piramide; 4 = pit
+//  ||||||||    ||||||||                                        ||||||||                ||||||||    |||||└--->2  /
+//  ||||||||    ||||||||                                        ||||||||                ||||||||    ||||└---->3  \
+//  ||||||||    ||||||||                                        ||||||||                ||||||||    |||└----->4   |
+//  ||||||||    ||||||||                                        ||||||||                ||||||||    ||└------>5   | these 5 bits are used to determine on what floor tile the element is
+//  ||||||||    ||||||||                                        ||||||||                ||||||||    |└------->6   |
+//  ||||||||    ||||||||                                        ||||||||                ||||||||    └-------->7  /  if all 8 bits == 0 => no floor element
+//  ||||||||    ||||||||                                        ||||||||                ||||||||
+//  ||||||||    ||||||||                                        ||||||||                |||||||└->0  \   these 3 bits are used to determine kind of sprite used for the object
+//  ||||||||    ||||||||                                        ||||||||                ||||||└-->1   |  0 = black card; 1 = white card; 2 = battery; 3 = bullet; 4 = chip; 5 = teleport, 6 = switch OFF, 7 switch = ON
+//  ||||||||    ||||||||                                        ||||||||                |||||└--->2  /
+//  ||||||||    ||||||||                                        ||||||||                ||||└---->3  \
+//  ||||||||    ||||||||                                        ||||||||                |||└----->4   |
+//  ||||||||    ||||||||                                        ||||||||                ||└------>5   |  these 5 bits are used to determine on what floor tile the object is
+//  ||||||||    ||||||||                                        ||||||||                |└------->6   |
+//  ||||||||    ||||||||                                        ||||||||                └-------->7  /   if all 8 bits == 0 => no object
+//  ||||||||    ||||||||                                        |||||||| 
+//  ||||||||    ||||||||                                        |||||||└->0  \   hese 3 bits are used to determine kind of sprite used for the enemy
+//  ||||||||    ||||||||                                        ||||||└-->1   |  0 = ; 1 = ; 2 = ; 3 = ;
+//  ||||||||    ||||||||                                        |||||└--->2  /
+//  ||||||||    ||||||||                                        ||||└---->3  \
+//  ||||||||    ||||||||                                        |||└----->4   |
+//  ||||||||    ||||||||                                        ||└------>5   |  these 5 bits are used to determine on what floor tile the enemy is
+//  ||||||||    ||||||||                                        |└------->6   |
+//  ||||||||    ||||||||                                        └-------->7  /   if all 8 bits == 0 => no enemy
 //  ||||||||    ||||||||
-//  ||||||||    ||||||||
-//  ||||||||    |||||||└->  \  these 2 bits are used to determine what door you'll go to
-//  ||||||||    ||||||└-->  /
-//  ||||||||    |||||└--->  \
-//  ||||||||    ||||└---->   |
-//  ||||||||    |||└----->   | these 6 bits are used for the roomnumber you'll go to
-//  ||||||||    ||└------>   |
-//  ||||||||    |└------->   |
-//  ||||||||    └-------->  /
+//  ||||||||    |||||||└->0  \  these 2 bits are used to determine what door you'll go to
+//  ||||||||    ||||||└-->1  /
+//  ||||||||    |||||└--->2  \
+//  ||||||||    ||||└---->3   |
+//  ||||||||    |||└----->4   | these 6 bits are used for the roomnumber you'll go to
+//  ||||||||    ||└------>5   |
+//  ||||||||    |└------->6   |
+//  ||||||||    └-------->7  /
 //  ||||||||
-//  ||||||||
-//  |||||||└->  DOOR NORTH  is closed (0 = false / 1 = true)
-//  ||||||└-->  DOOR EAST   is closed (0 = false / 1 = true)
-//  |||||└--->  DOOR SOUTH  is closed (0 = false / 1 = true)
-//  ||||└---->  DOOR WEST   is closed (0 = false / 1 = true)
-//  |||└----->  DOOR NORTH  exists    (0 = false / 1 = true)
-//  ||└------>  DOOR EAST   exists    (0 = false / 1 = true)
-//  |└------->  DOOR SOUTH  exists    (0 = false / 1 = true)
-//  └-------->  DOOR WEST   exists    (0 = false / 1 = true)
+//  |||||||└->0  DOOR NORTH  is closed (0 = false / 1 = true)
+//  ||||||└-->1  DOOR EAST   is closed (0 = false / 1 = true)
+//  |||||└--->2  DOOR SOUTH  is closed (0 = false / 1 = true)
+//  ||||└---->3  DOOR WEST   is closed (0 = false / 1 = true)
+//  |||└----->4  DOOR NORTH  exists    (0 = false / 1 = true)
+//  ||└------>5  DOOR EAST   exists    (0 = false / 1 = true)
+//  |└------->6  DOOR SOUTH  exists    (0 = false / 1 = true)
+//  └-------->7  DOOR WEST   exists    (0 = false / 1 = true)
 //
 //
 //
-// TRANSPORT
+// transporters data, the order of the data is by ascending numbers (ROOM X, ROOM Y, ROOM Z , ...)
+// GOTO ROOM
 //0b00000001,
-//  |||||||└->  \
-//  ||||||└-->   |
-//  |||||└--->   | these 6 bits are used for the roomnumber you'll go to
-//  ||||└---->   |
-//  |||└----->   |
-//  ||└------>  /
-//  |└-------> NOT USED
-//  └--------> NOT USED
+//  |||||||└->0  \
+//  ||||||└-->1   |
+//  |||||└--->2   | these 6 bits are used for the roomnumber you'll go to
+//  ||||└---->3   |
+//  |||└----->4   |
+//  ||└------>5  /
+//  |└------->6 NOT USED
+//  └-------->7 NOT USED
 //
 //
 //
-//    ROOM      ELEMENT
-//0b00000001, 0b00000001,
+// data about the elements that get influenced: in what room, coming from what switch in which room
+// ELEMENTS     OBJECT       WHAT
+//  IN ROOM    AT  ROOM    ELEMENTS
+//0b00000011, 0b00000000, 0b00011111,
+//  ||||||||    ||||||||    ||||||||
+//  ||||||||    ||||||||    |||||||└->0 FLOOR  5 INFLUENCED (0 = false / 1 = true)
+//  ||||||||    ||||||||    ||||||└-->1 FLOOR  4 INFLUENCED (0 = false / 1 = true)
+//  ||||||||    ||||||||    |||||└--->2 FLOOR  3 INFLUENCED (0 = false / 1 = true)
+//  ||||||||    ||||||||    ||||└---->3 FLOOR  2 INFLUENCED (0 = false / 1 = true)
+//  ||||||||    ||||||||    |||└----->4 FLOOR  1 INFLUENCED (0 = false / 1 = true)
+//  ||||||||    ||||||||    ||└------>5 OBJECT 3 INFLUENCED (0 = false / 1 = true)
+//  ||||||||    ||||||||    |└------->6 ENEMY  2 INFLUENCED (0 = false / 1 = true)
+//  ||||||||    ||||||||    └-------->7 ENEMY  1 INFLUENCED (0 = false / 1 = true)
 //  ||||||||    ||||||||
-//  ||||||||    |||||||└->  7 => 0 FLOOR  5 INFLUENCED (0 = false / 1 = true)
-//  ||||||||    ||||||└-->  6 => 1 FLOOR  4 INFLUENCED (0 = false / 1 = true)
-//  ||||||||    |||||└--->  5 => 2 FLOOR  3 INFLUENCED (0 = false / 1 = true)
-//  ||||||||    ||||└---->  4 => 3 FLOOR  2 INFLUENCED (0 = false / 1 = true)
-//  ||||||||    |||└----->  3 => 4 FLOOR  1 INFLUENCED (0 = false / 1 = true)
-//  ||||||||    ||└------>  2 => 5 OBJECT 3 INFLUENCED (0 = false / 1 = true)
-//  ||||||||    |└------->  1 => 6 ENEMY  2 INFLUENCED (0 = false / 1 = true)
-//  ||||||||    └-------->  0 => 7 ENEMY  1 INFLUENCED (0 = false / 1 = true)
+//  ||||||||    |||||||└->0  \
+//  ||||||||    ||||||└-->&   |
+//  ||||||||    |||||└--->2   | these 6 bits are used for the roomnumber where the elements are influenced
+//  ||||||||    ||||└---->3   |
+//  ||||||||    |||└----->4   |
+//  ||||||||    ||└------>5  /
+//  ||||||||    |└------->6 NOT USED
+//  ||||||||    └-------->7 NOT USED
 //  ||||||||
-//  ||||||||
-//  |||||||└->  \
-//  ||||||└-->   |
-//  |||||└--->   | these 6 bits are used for the roomnumber where the elements are influenced
-//  ||||└---->   |
-//  |||└----->   |
-//  ||└------>  /
-//  |└-------> RESERVED FOR SWITCH (0 = OFF / 1 = ON)
-//  └--------> NOT USED
+//  |||||||└->0  \
+//  ||||||└-->1   |
+//  |||||└--->2   | these 6 bits are used for the roomnumber where the elements are influenced
+//  ||||└---->3   |
+//  |||└----->4   |
+//  ||└------>5  /
+//  |└------->6 NOT USED
+//  └-------->7 NOT USED
 //
 //
 
@@ -142,48 +171,54 @@ const unsigned char PROGMEM level01[] =
 {
   5,          // amount of rooms
   2,          // amount of transporters
-  3,          // amount of influenced objects 
+  2,          // amount of rooms with influenceable objects
+
+  // NEXT LEVEL DOOR
+  0b0000000, // data about the door and room that gets you to the next level
+
+  // ALL THE DATA FOR EACH ROOM AND EACH ROOM HAS 13 BYTES
+  // DOORS         NORTH       EAST       SOUTH       WEST         ENEMY1      ENEMY2        OBJECT3       FLOOR1      FLOOR2      FLOOR3      FLOOR4      FLOOR5
+  0b11111001,   0b00000110, 0b00001011, 0b00001100, 0b00010001,   0b00000000, 0b00000000,   0b00110101,   0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room0
+  0b01000000,   0b00000000, 0b00000000, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b01100100,   0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room1
+  0b10000000,   0b00000000, 0b00000000, 0b00000000, 0b00000001,   0b00000000, 0b00000000,   0b01100001,   0b00000001, 0b00001010, 0b00010011, 0b00011011, 0b00100011, // room2
+  0b00010000,   0b00000010, 0b00000000, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b01100110,   0b00000100, 0b00101100, 0b01010100, 0b01111100, 0b10100100, // room3
+  0b00100000,   0b00000000, 0b00000011, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b01100110,   0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room4  
+
+  // transporters data, the order of the data is by ascending numbers (ROOM X, ROOM Y, ROOM Z , ...)
+  // GOTO ROOM
+  0b00000001,
+  0b00000100,
+
+  // data about the elements that get influenced
+  // ELEMENTS    OBJECT       WHAT
+  // IN ROOM    AT  ROOM    ELEMENTS
+  0b00000011,  0b00000011, 0b00011111,
+  0b00000010,  0b00000100, 0b00000111,
+};
+
+const unsigned char PROGMEM level02[] =
+{
+  5,          // amount of rooms
+  2,          // amount of transporters
+  1,          // amount of rooms with influenceable objects 
   0b0000000, // data about the door and room that gets you to the next level
 
   // DOORS         NORTH       EAST       SOUTH       WEST         ENEMY1      ENEMY2        OBJECT3       FLOOR1      FLOOR2      FLOOR3      FLOOR4      FLOOR5
   0b11111001,   0b00000110, 0b00001011, 0b00001100, 0b00010001,   0b00000000, 0b00000000,   0b00110101,   0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room0
   0b01000000,   0b00000000, 0b00000000, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b01100100,   0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room1
-  0b10000000,   0b00000000, 0b00000000, 0b00000000, 0b00000001,   0b00000000, 0b00000000,   0b01100001,   0b00000001, 0b00001010, 0b00010011, 0b00011011, 0b00100011, // room2
-  0b00010000,   0b00000010, 0b00000000, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b01100101,   0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room3
+  0b11111111,   0b00000000, 0b00000000, 0b00000000, 0b00000001,   0b00000000, 0b00000000,   0b01100001,   0b00000001, 0b00001010, 0b00010011, 0b00011011, 0b00100011, // room2
+  0b00010000,   0b00000010, 0b00000000, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b01100110,   0b00000100, 0b00101100, 0b01010100, 0b01111100, 0b10100100, // room3
   0b00100000,   0b00000000, 0b00000011, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b01100000,   0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room4  
 
-  // transporters data, the order of the data is by ascending numbers
-  // ROOM
+  // transporters data, the order of the data is by ascending numbers (ROOM X, ROOM Y, ROOM Z , ...)
+  // GOTO ROOM
   0b00000001,
   0b00000100,
 
   // data about the elements that get influenced
-  // ROOM         ELEMENT
-  0b00000001,  0b00000001,
-  0b00000011,  0b00000011,
-  0b00000100,  0b00011111,
-};
-
-const unsigned char PROGMEM level02[] =
-{
-  4, // amount of rooms
-  1, // amount of transporters (the actual amount is this number double)
-  3, // amount of influencing objects
-  0b10001111, 0b10000000, 0b11000000, 0b00000000, 0b01000000,     0b00000000, 0b00000000,    0b00000000,  0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000,  //room00
-  255, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, //room01
-  255, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, //room02
-  255, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, //room03
-
-  // transporters data, the order of the data is by ascending numbers
-  // Room going to    tile going to
-  0b00000001,         0b00000001,
-  0b00000011,         0b00000011,
-
-  // data about the elements that get influenced
-  // ROOM         ELEMENT
-  0b00000001,  0b00000001,
-  0b00000011,  0b00000011,
-  0b00000100,  0b00011111,
+  // ELEMENTS   OBJECT       WHAT
+  // IN ROOM    AT  ROOM   ELEMENTS
+  0b00000011,  0b00000011, 0b00011111,
 };
 
 
