@@ -32,6 +32,7 @@
 #define STATE_GAME_PAUSE             9
 #define STATE_GAME_OVER              10
 #define STATE_GAME_TRANSPORTING      11
+#define STATE_GAME_FINISHED          12
 
 //define facing directions
 #define NORTH                        0
@@ -76,9 +77,7 @@ byte testingTile;
 int currentRoomY;
 byte selectorX = 0;
 byte selectorX2 = 0;
-
 byte amountOfTransporters;
-
 byte buttonSchemeOffset;
 
 #endif

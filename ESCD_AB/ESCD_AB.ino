@@ -40,6 +40,7 @@ const FunctionPointer PROGMEM  mainGameLoop[] =
   stateGamePause,
   stateGameOver,
   stateGameTransporting,
+  stateGameFinished,
 };
 
 
