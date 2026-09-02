@@ -1,49 +1,66 @@
 #ifndef DICTIONARY_H
 #define DICTIONARY_H
 
-void fillTextBox()
-{
-  
-}
+unsigned char textBox[120];
 
-unsigned char textBox[] = 
-{
-  0,0,0,0, //
-  1,2,3,0, //D
-  1,4,1,0, //A
-  1,5,1,0, //N
-  1,6,7,0, //G
-  1,8,8,0, //E
-  1,9,10,0,//R
-  0,0,0,0, //
-  0,0,0,0, //
-  0,0,0,0, //
-  1,2,3,0, //D
-  1,4,1,0, //A
-  1,5,1,0, //N
-  1,6,7,0, //G
-  1,8,8,0, //E
-  1,9,10,0,//R
-  0,0,0,0, //
-  0,0,0,0, //
-  1,2,3,0, //D
-  1,4,1,0, //A
-  1,5,1,0, //N
-  1,6,7,0, //G
-  1,8,8,0, //E
-  1,9,10,0,//R
-  0,0,0,0, //
-  0,0,0,0, //
-  0,0,0,0, //
-  1,2,3,0, //D
-  1,4,1,0, //A
-  1,5,1,0, //N
-  1,6,7,0, //G
-  1,8,8,0, //E
-  1,9,10,0,//R
-  0,0,0,0, //
+PROGMEM const char messages[] = {
+  0,0,0, //
+  1,2,3, //D
+  1,4,1, //A
+  1,5,1, //N
+  1,6,7, //G
+  1,8,8, //E
+  1,9,10,//R
+  0,0,0, //
+  1,2,3, //D
+  1,4,1, //A
+  1,5,1, //N
+  1,6,7, //G
+  1,8,8, //E
+  1,9,10,//R
+  0,0,0, //
+  1,2,3, //D
+  1,4,1, //A
+  1,5,1, //N
+  1,6,7, //G
+  1,8,8, //E
+  1,9,10,//R
+  0,0,0, //
+  1,2,3, //D
+  1,4,1, //A
+  1,5,1, //N
+  1,6,7, //G
+  1,8,8, //E
+  1,9,10,//R
+  0,0,0, //
 };
 
+
+
+void clearTextBox()
+{
+  memset(textBox, 0, sizeof(textBox));
+}
+
+void fillTextBox(byte index)
+{
+  byte spacing = 0;
+  memset(textBox, 0, sizeof(textBox));
+  for (byte i; i< sizeof(textBox);i++)
+  {
+    if (spacing == 3)
+    {
+      spacing = 0;
+      textBox[i] = 0;
+    }
+    else 
+    {
+      textBox[i] = pgm_read_byte(&messages[i]);
+      spacing++;
+    }
+  }
+  //memcpy_P(textBox, messages, strlen_P(pgm_read_byte(&messages[]);
+}
 
 PROGMEM const unsigned char font[] =
 {

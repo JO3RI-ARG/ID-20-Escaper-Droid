@@ -364,7 +364,7 @@ void drawFloor()
     {
       if (x==2 && y == 2 && currentRoom == exitRoomLocation) 
       {
-        //byte test = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + i + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]);
+        // byte test = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + i + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]);
         // find in wath room the level exit is and only draw that there
         if ((arduboy.everyXFrames(8))) levelUpAnimation = (++levelUpAnimation % 3);
         sprites.drawPlusMask(48 - (12 * x) + (12 * y), currentRoomY + 27 + (6 * x) + (6 * y), floorTile_plus_mask, 5 + levelUpAnimation);
