@@ -3,7 +3,58 @@
 
 unsigned char textBox[120];
 
+PROGMEM const char testMessage[] = "HELLO WORLD";
+
+
 PROGMEM const char messages[] = {
+0B00011111,
+0B00000100,
+0B00011111,
+
+0B00011111,
+0B00010101,
+0B00010001,
+
+0B00011111,
+0B00010000,
+0B00010000,
+
+0B00011111,
+0B00010000,
+0B00010000,
+
+0B00011111,
+0B00010001,
+0B00011111,
+
+0B00000000,
+0B00000000,
+0B00000000,
+
+0B00000000,
+0B00000000,
+0B00000000,
+
+0B00011111,
+0B00011100,
+0B00011111,
+
+0B00011111,
+0B00010001,
+0B00011111,
+
+0B00011111,
+0B00000101,
+0B00011010,
+
+0B00011111,
+0B00010000,
+0B00010000,
+
+0B00011111,
+0B00010001,
+0B00001110,
+  /*
   0,0,0, //
   1,2,3, //D
   1,4,1, //A
@@ -33,6 +84,7 @@ PROGMEM const char messages[] = {
   1,8,8, //E
   1,9,10,//R
   0,0,0, //
+  */
 };
 
 
@@ -45,66 +97,23 @@ void clearTextBox()
 void fillTextBox(byte index)
 {
   byte spacing = 0;
+  byte copyPlace = 0;
   memset(textBox, 0, sizeof(textBox));
-  for (byte i; i< sizeof(textBox);i++)
-  {
-    if (spacing == 3)
+  for (byte i=0; i< sizeof(messages)/3*4;i++)
+  { 
+    if (spacing > 2)
     {
       spacing = 0;
       textBox[i] = 0;
     }
-    else 
+    else
     {
-      textBox[i] = pgm_read_byte(&messages[i]);
+      textBox[i] = pgm_read_byte(&messages[copyPlace]);
+      copyPlace++;
       spacing++;
     }
   }
-  //memcpy_P(textBox, messages, strlen_P(pgm_read_byte(&messages[]);
 }
-
-PROGMEM const unsigned char font[] =
-{
-  // Cijfers 0-9
-  31,17,31,0, //0
-  17,31,17,0, //1
-  29,21,23,0, //2
-  17,21,31,0, //3
-   7, 4,31,0, //4
-  23,21,29,0, //5
-  31,21,29,0, //6
-   1, 1,31,0, //7
-  31,21,31,0, //8
-  23,21,31,0, //9
-
-  // Letters A-Z
-  31, 5,31,0, //A
-  31,21,10,0, //B
-  31,17,17,0, //C
-  31,17,14,0, //D
-  31,21,17,0, //E
-  31, 5, 1,0, //F
-  31,17,29,0, //G
-  31, 4,31,0, //H
-  17,31,17,0, //I
-  25,17,31,0, //J
-  31, 6,25,0, //K
-  31,16,16,0, //L
-  31, 7,31,0, //M
-  31, 1,31,0, //N
-  31,17,31,0, //O
-  31, 5, 7,0, //P
-  15, 9,31,0, //Q
-  31, 5,26,0, //R
-  23,21,29,0, //S
-   1,31, 1,0, //T
-  31,16,31,0, //U
-  15,16,15,0, //V
-  31,28,31,0, //W
-  27, 4,27,0, //X
-   7,28, 7,0, //Y
-  25,21,19,0, //Z
-};
-
 
 PROGMEM const unsigned char library[] =
 {

@@ -881,31 +881,4 @@ Bitmap PROGMEM letterPartsNew[] =
   0B00011111,
 };
 
-Bitmap PROGMEM letterParts[] =
-{
-1,8,
-// FRAME 00
-0x00,
-// FRAME 01
-0x1f, 
-// FRAME 02
-0x11, 
-// FRAME 03
-0x0e, 
-// FRAME 04
-0x05, 
-// FRAME 05
-0x01, 
-// FRAME 06
-0x11, 
-// FRAME 07
-0x1d, 
-// FRAME 08
-0x15, 
-// FRAME 09
-0x0d, 
-// FRAME 10
-0x17,
-};
-
 #endif

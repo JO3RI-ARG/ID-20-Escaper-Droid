@@ -382,7 +382,7 @@ void drawTicker()
   {
     for (byte z = 0;z<2;z++)
     {
-      sprites.drawSelfMasked(x, currentRoomY + 38 - y, letterParts, textBox[x]);
+      sprites.drawSelfMasked(x, currentRoomY + 38 - y, letterPartsNew, textBox[x]);
       x++;
     }
     (w < 29) ? y++ : y--;
