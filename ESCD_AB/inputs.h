@@ -83,7 +83,11 @@ void checkInputs()
   if (arduboy.justPressed(A_BUTTON))gameState = STATE_GAME_PAUSE;
   if (arduboy.justPressed(B_BUTTON))
   {
-    switch (player.characteristics & 0b00000011)  // check what direction droid is facing
+    if (currentRoom == exitRoomLocation && player.isOnTile == TILE_IN_MIDDLE)
+    {
+      gameState = STATE_GAME_NEXT_LEVEL;
+    }
+    else switch (player.characteristics & 0b00000011)  // check what direction droid is facing
     {
       case NORTH:
         // OPEN A DOOR/LEVELDOOR IF DROID HAS A WHITE/BLACK CARD

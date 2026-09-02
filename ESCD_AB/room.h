@@ -49,6 +49,7 @@
 //define how collision works
 #define DIFF(A, B) (((A) > (B)) ? ((A) - (B)) : ((B) - (A)))
 
+byte levelUpAnimation = 0;
 
 struct Room {
   public:
@@ -131,11 +132,15 @@ Room stageRoom[MAX_AMOUNT_OF_ROOMS];
 
 void buildRooms(byte currentLevel)
 {
+  // let's read out in witch room the exit to the next level is
+  exitRoomLocation = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][LEVEL_ROOM_DATA_START_AT_BYTE]);
+
   byte amountOfRooms = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][AMOUNT_OF_ROOMS_AT_BYTE]);
   int transportDataAtByte = ROOMS_DATA_START_AT_BYTE + (BYTES_USED_FOR_EVERY_ROOM * amountOfRooms);
   int influenceDataAtByte = transportDataAtByte + pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][AMOUNT_OF_TRANSPORTERS_AT_BYTE]);
   byte transporterCounter = 0;
   byte influenceDataCounter = 0;
+  // start reading the data out off PROGMEM
   for (byte roomNumber = 0; roomNumber < amountOfRooms; roomNumber++)
   {
     // clear all info
@@ -236,14 +241,12 @@ void enterRoom(byte roomNumber, byte currentLevel)
       // set all enemies at there position
       // set elements on correct place 0 => 24)
       byte currentTile = (pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + i + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)])) >> 3;
-      //Serial.println((pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + i + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)])) >> 3);
+      elements[i].characteristics = ((pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + i + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]))); //& 0b00000111);
+      if (currentTile > 24) elements[i].characteristics = 0;
       elements[i].x = translateTileToX(currentTile);
       elements[i].y = translateTileToY(currentTile);
-
-      // get all the data stored in level data for each element (what tile it is on and white sprite to use)
-      elements[i].characteristics = ((pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + i + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]))); //& 0b00000111);
-      //Serial.println(elements[i].characteristics, BIN);
-
+        // get all the data stored in level data for each element (what tile it is on and white sprite to use)
+      
       // we will always set the current direction to EAST (0b00001000)
       //bitSet (elements[i].characteristics, 3);
 
@@ -359,8 +362,39 @@ void drawFloor()
   {
     for (byte x = 0; x < 5; x++)
     {
-      sprites.drawPlusMask(48 - (12 * x) + (12 * y), currentRoomY + 27 + (6 * x) + (6 * y), floorTile_plus_mask, 0);
+      if (x==2 && y == 2 && currentRoom == exitRoomLocation) 
+      {
+        //byte test = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + i + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]);
+        // find in wath room the level exit is and only draw that there
+        if ((arduboy.everyXFrames(8))) levelUpAnimation = (++levelUpAnimation % 3);
+        sprites.drawPlusMask(48 - (12 * x) + (12 * y), currentRoomY + 27 + (6 * x) + (6 * y), floorTile_plus_mask, 5 + levelUpAnimation);
+      }
+      else sprites.drawPlusMask(48 - (12 * x) + (12 * y), currentRoomY + 27 + (6 * x) + (6 * y), floorTile_plus_mask, 0);
     }
+  }
+}
+
+void drawTicker()
+{
+  byte y=0;
+  byte x=0;
+  for (byte  w= 0;w<59;w++ )
+  {
+    for (byte z = 0;z<2;z++)
+    {
+      sprites.drawSelfMasked(x, currentRoomY + 38 - y, letterParts, textBox[x]);
+      x++;
+    }
+    (w < 29) ? y++ : y--;
+  }
+  if ((arduboy.everyXFrames(8)))
+  {
+    byte temp = textBox[0];          // save the first byte
+    for (int i = 0; i < 120; i++)
+    {
+      textBox[i] = textBox[i + 1];
+    }
+    textBox[120] = temp;                        // put the saved byte at the end
   }
 }
 
@@ -371,7 +405,10 @@ void drawWalls()
     sprites.drawSelfMasked( -2 + (10 * x), currentRoomY + 25 - (5 * x), wallParts, NORTH);
     sprites.drawSelfMasked(60 + (10 * x), currentRoomY + (5 * x), wallParts, EAST);
   }
+  drawTicker();
 }
+
+
 
 
 ///////////////// DRAW DOOR NORTH  ////////////////

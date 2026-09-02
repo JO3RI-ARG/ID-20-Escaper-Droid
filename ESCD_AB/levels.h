@@ -8,7 +8,8 @@
 #define AMOUNT_OF_TRANSPORTERS_AT_BYTE            1
 #define AMOUNT_OF_INFLUENCING_OBJECTS_AT_BYTE     2
 #define LEVEL_DOOR_DATA_START_AT_BYTE             3
-#define ROOMS_DATA_START_AT_BYTE                  4
+#define LEVEL_ROOM_DATA_START_AT_BYTE             4
+#define ROOMS_DATA_START_AT_BYTE                  5
 #define DOORS_DATA_START_AT_BYTE                  ROOMS_DATA_START_AT_BYTE + 1
 #define ELEMENTS_DATA_START_AT_BYTE               ROOMS_DATA_START_AT_BYTE + 5            
 #define BYTES_USED_FOR_EVERY_ROOM                 13
@@ -66,22 +67,32 @@
 //  |└------->   |
 //  └-------->  / 
 
+// NEXT LEVEL ROOM
+//0b00000001,
+//  |||||||└--->  \ 
+//  ||||||└---->   |
+//  |||||└----->   | these 6 bits are used to set in which room the next level TILE is
+//  ||||└------>   |
+//  |||└------->   |
+//  ||└-------->  / 
+//  |└--------->  NOT USED
+//  └---------->  NOT USED
 
 // ALL THE DATA FOR EACH ROOM AND EACH ROOM HAS 13 BYTES
 // DOORS         NORTH        EAST       SOUTH        WEST       ENEMY1      ENEMY2     OBJECT3     FLOOR1      FLOOR2      FLOOR3      FLOOR4      FLOOR5
 //0b11001110, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000,
 //  ||||||||    ||||||||                                        ||||||||                ||||||||    ||||||||
 //  ||||||||    ||||||||                                        ||||||||                ||||||||    |||||||└->0  \  these 3 bits are used to determine kind of sprite used for the floor
-//  ||||||||    ||||||||                                        ||||||||                ||||||||    ||||||└-->1   | 0 = none; 1 = box; 2 = spike; 3 = piramide; 4 = pit
+//  ||||||||    ||||||||                                        ||||||||                ||||||||    ||||||└-->1   | 0 = none; 1 = box; 2 = spike; 3 = piramide; 4 = pit; 5 = ; 6 =; 7= LEVEL UP
 //  ||||||||    ||||||||                                        ||||||||                ||||||||    |||||└--->2  /
 //  ||||||||    ||||||||                                        ||||||||                ||||||||    ||||└---->3  \
-//  ||||||||    ||||||||                                        ||||||||                ||||||||    |||└----->4   |
+//  ||||||||    ||||||||                                        ||||||||                ||||||||    |||└----->4   | if the floor is 
 //  ||||||||    ||||||||                                        ||||||||                ||||||||    ||└------>5   | these 5 bits are used to determine on what floor tile the element is
 //  ||||||||    ||||||||                                        ||||||||                ||||||||    |└------->6   |
 //  ||||||||    ||||||||                                        ||||||||                ||||||||    └-------->7  /  if all 8 bits == 0 => no floor element
 //  ||||||||    ||||||||                                        ||||||||                ||||||||
 //  ||||||||    ||||||||                                        ||||||||                |||||||└->0  \   these 3 bits are used to determine kind of sprite used for the object
-//  ||||||||    ||||||||                                        ||||||||                ||||||└-->1   |  0 = black card; 1 = white card; 2 = battery; 3 = bullet; 4 = chip; 5 = teleport, 6 = switch OFF, 7 switch = ON
+//  ||||||||    ||||||||                                        ||||||||                ||||||└-->1   |  0 = black card; 1 = white card; 2 = battery; 3 = bullet; 4 = chip; 5 = teleport, 6 = switch OFF, 7 switch = ON,
 //  ||||||||    ||||||||                                        ||||||||                |||||└--->2  /
 //  ||||||||    ||||||||                                        ||||||||                ||||└---->3  \
 //  ||||||||    ||||||||                                        ||||||||                |||└----->4   |
@@ -174,12 +185,15 @@ const unsigned char PROGMEM level01[] =
   2,          // amount of rooms with influenceable objects
 
   // NEXT LEVEL DOOR
-  0b0000000, // data about the door and room that gets you to the next level
+  0b0000000,  // data about the door and room that gets you to the next level
+
+  // NEXT LEVEL ROOM
+  0b0000001,  // data about which room gets you to the next level
 
   // ALL THE DATA FOR EACH ROOM AND EACH ROOM HAS 13 BYTES
   // DOORS         NORTH       EAST       SOUTH       WEST         ENEMY1      ENEMY2        OBJECT3       FLOOR1      FLOOR2      FLOOR3      FLOOR4      FLOOR5
   0b11111001,   0b00000110, 0b00001011, 0b00001100, 0b00010001,   0b00000000, 0b00000000,   0b00110101,   0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room0
-  0b01000000,   0b00000000, 0b00000000, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b01100100,   0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room1
+  0b01000000,   0b00000000, 0b00000000, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b00000000,   0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room1
   0b10000000,   0b00000000, 0b00000000, 0b00000000, 0b00000001,   0b00000000, 0b00000000,   0b01100001,   0b00000001, 0b00001010, 0b00010011, 0b00011011, 0b00100011, // room2
   0b00010000,   0b00000010, 0b00000000, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b01100110,   0b00000100, 0b00101100, 0b01010100, 0b01111100, 0b10100100, // room3
   0b00100000,   0b00000000, 0b00000011, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b01100110,   0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room4  
@@ -201,7 +215,8 @@ const unsigned char PROGMEM level02[] =
   5,          // amount of rooms
   2,          // amount of transporters
   1,          // amount of rooms with influenceable objects 
-  0b0000000, // data about the door and room that gets you to the next level
+  0b0000000,  // data about the door and room that gets you to the next level
+  0b0000010,  // data about which room gets you to the next level
 
   // DOORS         NORTH       EAST       SOUTH       WEST         ENEMY1      ENEMY2        OBJECT3       FLOOR1      FLOOR2      FLOOR3      FLOOR4      FLOOR5
   0b11111001,   0b00000110, 0b00001011, 0b00001100, 0b00010001,   0b00000000, 0b00000000,   0b00110101,   0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room0

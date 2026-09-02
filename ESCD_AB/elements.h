@@ -47,6 +47,7 @@
 #define SCORE_OPEN_DOOR           50
 #define SCORE_LEVEL_DOOR          1000
 
+
 struct Element
 {
   public:
@@ -129,7 +130,8 @@ void drawObject()
 // We have 4 different floor types and 5 floor tiles we can draw
 void drawFloor(byte floor)
 {
-  sprites.drawPlusMask(elements[floor].x - 3, elements[floor].y + currentRoomY + 9, floorTile_plus_mask, ((elements[floor].characteristics & 0b00000111)));
+  if (elements[floor].characteristics > 0b00000000)
+  sprites.drawPlusMask(elements[floor].x - 3, elements[floor].y + currentRoomY + 9, floorTile_plus_mask, (elements[floor].characteristics & 0b00000111));
 }
 
 void drawFloorOne()
@@ -156,6 +158,7 @@ void drawFloorFive()
 {
   drawFloor(FLOOR_FIVE);
 }
+
 
 ///////////////// DRAW ENEMIE BULLET ////////
 /////////////////////////////////////////////

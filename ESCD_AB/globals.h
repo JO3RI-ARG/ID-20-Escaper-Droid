@@ -8,6 +8,7 @@
 #include "bitmaps.h"
 #include "sfx.h"
 #include "song.h"
+#include "dictionary.h"
 
 // constants /////////////////////////////////////////////////////////////////
 
@@ -79,5 +80,6 @@ byte selectorX = 0;
 byte selectorX2 = 0;
 byte amountOfTransporters;
 byte buttonSchemeOffset;
+byte exitRoomLocation = 0;
 
 #endif

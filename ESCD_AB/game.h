@@ -27,11 +27,7 @@ void stateGamePlaying()
     {
       if (arduboy.everyXFrames(2)) walkThroughDoor();
     }
- //   else if(currentRoom == (((pgm_read_byte(&levels[level-LEVEL_OFFSET][LEVEL_DOOR_DATA_START_AT_BYTE])) & 0b1111100)>>2))
- //   {
- //     gameState = STATE_GAME_NEXT_LEVEL;
- //   }
-    else //if(currentRoom != (((pgm_read_byte(&levels[level-LEVEL_OFFSET][LEVEL_DOOR_DATA_START_AT_BYTE])) & 0b1111100)>>2))
+    else 
     {
       player.isOnTile = goToTile(currentRoom, level);
       currentRoomY = setCurrentRoomY(player.isOnTile);
@@ -84,7 +80,7 @@ void stateGameNextLevel()
   player.y = translateTileToY (player.isOnTile) + currentRoomY ;
   buildRooms(level);
   enterRoom(currentRoom, level);
-  gameState = STATE_GAME_PLAYING;
+  gameState = STATE_GAME_PAUSE;
 }
 
 

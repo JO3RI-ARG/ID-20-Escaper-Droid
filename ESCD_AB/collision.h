@@ -118,9 +118,6 @@ byte tileIsOccupied(byte tileTesting, bool playerOrEnemy, bool enemyTwo)
     }
     else
     {
-      //Serial.print(tileTesting);
-      //Serial.print(" : ");
-      //Serial.println(currentlyOnTestingTile);
       if (!enemyTwo && currentlyOnTestingTile == ENEMY_ONE) return false;
       else if (enemyTwo && currentlyOnTestingTile == ENEMY_TWO) return false;
       else if (currentlyOnTestingTile == PLAYER_DROID) return PLAYER_DROID;
