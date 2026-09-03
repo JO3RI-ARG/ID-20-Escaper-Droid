@@ -12,8 +12,8 @@
 //the textBox[] can max hold 120 of this letter parts
 //or 40 characters.
 //if we're going to use more than 4 centences:
-//4 * 120 = 480 + 32 = 512
-//4 * 40 = 160 + 120 = 280
+//4 * 120 = 480 + 32 = 512 if hard coded
+//4 * 40 = 160 + 120 + 32 = 312 if soft coded
 
 PROGMEM const unsigned char font[] = //... bytes if we would use the font as a bitmap.
 {

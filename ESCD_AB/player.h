@@ -24,6 +24,7 @@
 
 #define DROID_HAS_BLACK_CARD_AT_BIT_5     5
 #define DROID_BATTERY_VISIBLE_AT_BIT_6    6
+#define MAX_ROOM_Y_SCROLLING            -28
 
 
 
@@ -87,12 +88,12 @@ void walkThroughDoor()
       player.x += 2;
       break;
     case SOUTH:
-      if (currentRoomY > -30)currentRoomY--;
+      if (currentRoomY > MAX_ROOM_Y_SCROLLING)currentRoomY--;
       else player.y += 1;
       player.x += 2;
       break;
     case WEST:
-      if (currentRoomY > -30)currentRoomY--;
+      if (currentRoomY > MAX_ROOM_Y_SCROLLING)currentRoomY--;
       else player.y += 1;
       player.x -= 2;
       break;
@@ -115,7 +116,6 @@ void playerLosesLife()
 
 void updatePlayer()
 {
-  //Serial.println(player.immuneTimer);
   if (bitRead(player.characteristics, DROID_IMMUNE_AT_BIT_3))
   {
     player.immuneTimer++;

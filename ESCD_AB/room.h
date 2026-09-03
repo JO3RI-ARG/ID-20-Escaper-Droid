@@ -8,6 +8,7 @@
 
 #define UPPERBIT_OFFSET               4
 #define LEVEL_OFFSET                  1
+#define ROOM_DRAWING_OFFSET           -10         
 
 #define TILE_INFRONT_DOOR_NORTH       2
 #define TILE_INFRONT_DOOR_EAST        10
@@ -218,7 +219,6 @@ bool checkIfOnCenterTile (byte coX, byte coY)
     {
       if (coX == 3 + (48 - (12 * x) + (12 * y)) && (coY == (27 + (6 * x) + (6 * y)) - 9))
       {
-        //Serial.println("on middle tile");
         return true;
       }
     }
@@ -234,8 +234,7 @@ void enterRoom(byte roomNumber, byte currentLevel)
   {
     // first clear the characteristics
     elements[i].characteristics = 0;
-
-    //Serial.print(bitRead (stageRoom[roomNumber].elementsActive, 7 - i));
+    // and now start reading all the data 
     if (bitRead (stageRoom[roomNumber].elementsActive, 7 - i))
     {
       // set all enemies at there position
@@ -376,25 +375,62 @@ void drawFloor()
 
 void drawTicker()
 {
-  byte y=0;
-  byte x=0;
-  for (byte  w= 0;w<59;w++ )
+  //if (bitRead(setTicker,0)==1)
   {
-    for (byte z = 0;z<2;z++)
+    byte y=0;
+    byte x=0;
+    for (byte  w= 0;w<59;w++ )
     {
-      sprites.drawSelfMasked(x, currentRoomY + 38 - y, letterPartsNew, charBox[x]);
-      x++;
+      for (byte z = 0;z<2;z++)
+      {
+        sprites.drawSelfMasked(x, currentRoomY + 38 - y, letterPartsNew, charBox[x]);
+        x++;
+      }
+      (w < 29) ? y++ : y--;
     }
-    (w < 29) ? y++ : y--;
-  }
+   // Serial.println(setTicker);
+    //if (setTicker == TEXT_SCROLL_LEFT)
+    
+    if ((arduboy.everyXFrames(8)))
+    {
+      //if (setTicker == TEXT_SCROLL_LEFT)
+      {
+        byte tempChar = charBox[0];          // save the first byte
+          for (int i = 0; i < 120; i++)
+          {
+            charBox[i] = charBox[i + 1];
+          }
+          charBox[120] = tempChar;
+      }
+    }
+    /*
   if ((arduboy.everyXFrames(8)))
   {
-    byte temp = charBox[0];          // save the first byte
-    for (int i = 0; i < 120; i++)
-    {
-      charBox[i] = charBox[i + 1];
-    }
-    charBox[120] = temp;                        // put the saved byte at the end
+    switch (setTicker)
+      {
+        case TEXT_SCROLL_LEFT:
+          {
+            byte tempChar = charBox[0];          // save the first byte
+            for (int i = 0; i < 120; i++)
+            {
+              charBox[i] = charBox[i + 1];
+            }
+            charBox[120] = tempChar;                        // put the saved byte at the end
+          }
+          break;
+        case TEXT_SCROLL_RIGHT:
+          {
+            byte tempChar = charBox[120];          // save the first byte
+            for (int i = 120; i > 0; i--)
+            {
+              charBox[i] = charBox[i - 1];
+            }
+            charBox[0] = tempChar;                        // put the saved byte at the end
+          }
+          break;
+        }
+      }
+      */
   }
 }
 
@@ -620,7 +656,6 @@ void checkOrderOfObjects(byte roomNumber, byte currentLevel)
   if (!bitRead(player.characteristics, DROID_GOES_THROUGH_DOOR_AT_BIT_5) && !bitRead(player.characteristics, DROID_COMES_OUT_DOOR_AT_BIT_6))
   {
     itemsOrder[player.isOnTile + ITEMS_ORDER_TILES_START] = PLAYER_DROID;
-    //Serial.println(player.isOnTile);
   }
   else
   {

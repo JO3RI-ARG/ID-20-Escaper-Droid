@@ -8,7 +8,7 @@
 #include "bitmaps.h"
 #include "sfx.h"
 #include "song.h"
-#include "dictionary.h"
+#include "text.h"
 
 // constants /////////////////////////////////////////////////////////////////
 

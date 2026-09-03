@@ -21,7 +21,6 @@ void checkInputs()
   {
     byte testingTile = tileFromXY(player.x, player.y - currentRoomY);
     if (testingTile < 25) player.isOnTile = tileFromXY(player.x, player.y - currentRoomY);
-    //Serial.println(player.isOnTile);
     if (arduboy.pressed(pgm_read_byte(&buttonScheme[NORTH + buttonSchemeOffset])))
     {
       bitClear(player.characteristics, 0);

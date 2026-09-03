@@ -45,8 +45,6 @@ void stateGamePlaying()
   updatePlayer();
   if (!bitRead(player.characteristics, 4)) updateEnemies();
   drawHUD();
-  //Serial.println(tileFromXY(player.x, player.y - currentRoomY));
-
 }
 
 
@@ -75,14 +73,13 @@ void stateGameNextLevel()
   level++;
   currentRoom = 0;
   player.isOnTile = TILE_GAME_STARTS_ON;
-  currentRoomY = -14;
+  currentRoomY = ROOM_DRAWING_OFFSET;
   player.x = translateTileToX (player.isOnTile);
   player.y = translateTileToY (player.isOnTile) + currentRoomY ;
   buildRooms(level);
   enterRoom(currentRoom, level);
-  loadMessage(0);
-  fillTextBox(0);
-
+  loadMessage(1);
+  fillTextBox();
   gameState = STATE_GAME_PAUSE;
 }
 

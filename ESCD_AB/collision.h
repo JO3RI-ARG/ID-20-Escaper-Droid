@@ -147,7 +147,6 @@ boolean hitObjects (int objectX, int objectY, int directionFacing, bool playerOr
       testingTile = tileFromXY(objectX - 6, objectY + 3);
       break;
   }
-  //Serial.println(testingTile);
   byte test = tileIsOccupied(testingTile, playerOrEnemy, enemy);
   if (test > 0)
   {
