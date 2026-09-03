@@ -1,181 +1,194 @@
 #ifndef FONT_H
 #define FONT_H
 
-// the font is used as a reference only.
-// To get the code as small as possible,
-// we only use 32 different 1x8 bitmaps.
-// so only 32 bytes to create all letters and numbers.
-// the bitmap is called letterPartsNew[] in bitmaps.h
-// this means each letter is now 3 bytes.
-// the textBox[] can max hold 120 of this letter parts
-// or 40 characters.
-// if we're going to use more than 4 centences:
-// 4 * 120 = 480 + 32 = 512
-// 4 * 40 = 160 + 120 = 280
+#define FONT_OFFSET               48
 
-PROGMEM const unsigned char font[] = //120 bytes if we would use the font as a bitmap.
+//the font is used as a reference only.
+//To get the code as small as possible,
+//we only use 32 different 1x8 bitmaps.
+//so only 32 bytes to create all letters and numbers.
+//the bitmap is called letterPartsNew[] in bitmaps.h
+//this means each letter is now 3 bytes.
+//the textBox[] can max hold 120 of this letter parts
+//or 40 characters.
+//if we're going to use more than 4 centences:
+//4 * 120 = 480 + 32 = 512
+//4 * 40 = 160 + 120 = 280
+
+PROGMEM const unsigned char font[] = //... bytes if we would use the font as a bitmap.
 {
-  3,8,
-// 0
+// 0  -  ASCII DEC 48 ; HEX 30
 0B00011111,
 0B00010001,
 0B00011111,
-// 1      
+// 1  -  ASCII DEC 49 ; HEX 31  
 0B00010001,
 0B00011111,
 0B00010000,
-// 2      
+// 2  -  ASCII DEC 50 ; HEX 32  
 0B00011101,
 0B00010101,
 0B00010111,
-// 3      
+// 3  -  ASCII DEC 51 ; HEX 33    
 0B00010001,
 0B00010101,
 0B00011111,
-// 4      
+// 4  -  ASCII DEC 52 ; HEX 34  
 0B00000111,
 0B00000100,
 0B00011111,
-// 5      
+// 5  -  ASCII DEC 53 ; HEX 35  
 0B00010111,
 0B00010101,
 0B00011101,
-// 6      
+// 6  -  ASCII DEC 54 ; HEX 36  
 0B00011111,
 0B00010101,
 0B00011101,
-// 7      
+// 7  -  ASCII DEC 55 ; HEX 37  
 0B00000001,
 0B00000001,
 0B00011111,
-// 8      
+// 8  -  ASCII DEC 56 ; HEX 38  
 0B00011111,
 0B00010101,
 0B00011111,
-// 9      
+// 9  -  ASCII DEC 57 ; HEX 39  
 0B00010111,
 0B00010101,
 0B00011111,
-// A      
+// :  -  ASCII DEC 58 ; HEX 3A
+0B00000000,
+0B00001010,
+0B00000000,
+// ;  -  ASCII DEC 59 ; HEX 3B
+0B00010000,
+0B00001010,
+0B00000000,
+// <  -  ASCII DEC 60 ; HEX 3C
+0B00000100,
+0B00001010,
+0B00010001,
+// =  -  ASCII DEC 61 ; HEX 3D
+0B00001010,
+0B00001010,
+0B00001010,
+// >  -  ASCII DEC 62 ; HEX 3E
+0B00010001,
+0B00001010,
+0B00000100,
+// ?  -  ASCII DEC 63 ; HEX 3F
+0B00000001,
+0B00010101,
+0B00000010,
+// @  -  ASCII DEC 64 ; HEX 40
+0B00001110,
+0B00010111,
+0B00010110,
+// A  -  ASCII DEC 65 ; HEX 41 
 0B00011111,
 0B00000101,
 0B00011111,
-// B      
+// B  -  ASCII DEC 66 ; HEX 42  
 0B00011111,
 0B00010101,
 0B00001010,
-// C      
+// C  -  ASCII DEC 67 ; HEX 43  
 0B00011111,
 0B00010001,
 0B00010001,
-// D      
+// D  -  ASCII DEC 68 ; HEX 44  
 0B00011111,
 0B00010001,
 0B00001110,
-// E       
+// E  -  ASCII DEC 69 ; HEX 45   
 0B00011111,
 0B00010101,
 0B00010001,
-// F       
+// F  -  ASCII DEC 70 ; HEX 46   
 0B00011111,
 0B00000101,
 0B00000001,
-// G       
+// G  -  ASCII DEC 71 ; HEX 47   
 0B00011111,
 0B00010001,
 0B00011101,
-// H       
+// H  -  ASCII DEC 72 ; HEX 48   
 0B00011111,
 0B00000100,
 0B00011111,
-// I       
+// I  -  ASCII DEC 73 ; HEX 49   
 0B00010001,
 0B00011111,
 0B00010001,
-// J       
+// J  -  ASCII DEC 74 ; HEX 4A   
 0B00011001,
 0B00010001,
 0B00011111,
-// K       
+// K  -  ASCII DEC 75 ; HEX 4B   
 0B00011111,
 0B00000110,
 0B00011001,
-// L      
+// L  -  ASCII DEC 76 ; HEX 4C  
 0B00011111,
 0B00010000,
 0B00010000,
-// M       
+// M  -  ASCII DEC 77 ; HEX 4D   
 0B00011111,
 0B00000111,
 0B00011111,
-// N       
+// N  -  ASCII DEC 78 ; HEX 4E   
 0B00011111,
 0B00000001,
 0B00011111,
-// O       
+// O  -  ASCII DEC 79 ; HEX 4F   
 0B00011111,
 0B00010001,
 0B00011111,
-// P       
+// P  -  ASCII DEC 80 ; HEX 50   
 0B00011111,
 0B00000101,
 0B00000111,
-// Q       
+// Q  -  ASCII DEC 81 ; HEX 51   
 0B00001111,
 0B00001001,
 0B00011111,
-// R       
+// R  -  ASCII DEC 82 ; HEX 52   
 0B00011111,
 0B00000101,
 0B00011010,
-// S       
+// S  -  ASCII DEC 83 ; HEX 53   
 0B00010111,
 0B00010101,
 0B00011101,
-// T       
+// T  -  ASCII DEC 84 ; HEX 54   
 0B00000001,
 0B00011111,
 0B00000001,
-// U       
+// U  -  ASCII DEC 85 ; HEX 55   
 0B00011111,
 0B00010000,
 0B00011111,
-// V             
+// V  -  ASCII DEC 86 ; HEX 56         
 0B00001111,
 0B00010000,
 0B00001111,
-// W       
+// W  -  ASCII DEC 87 ; HEX 57   
 0B00011111,
 0B00011100,
 0B00011111,
-// X       
+// X  -  ASCII DEC 88 ; HEX 58   
 0B00011011,
 0B00000100,
 0B00011011,
-// Y       
+// Y  -  ASCII DEC 89 ; HEX 59   
 0B00000111,
 0B00011100,
 0B00000111,
-// Z       
+// Z  -  ASCII DEC 90 ; HEX 5A   
 0B00011001,
 0B00010101,
 0B00010011,
-// :       
-0B00000000,
-0B00001010,
-0B00000000,
-// !       
-0B00000000,
-0B00010111,
-0B00000000,
-// °       
-0B00000000,
-0B00000100,
-0B00000000,
-//
-0B00000000,
-0B00000000,
-0B00000000,
 };
 
 #endif

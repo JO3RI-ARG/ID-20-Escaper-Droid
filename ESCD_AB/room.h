@@ -382,19 +382,19 @@ void drawTicker()
   {
     for (byte z = 0;z<2;z++)
     {
-      sprites.drawSelfMasked(x, currentRoomY + 38 - y, letterPartsNew, textBox[x]);
+      sprites.drawSelfMasked(x, currentRoomY + 38 - y, letterPartsNew, charBox[x]);
       x++;
     }
     (w < 29) ? y++ : y--;
   }
   if ((arduboy.everyXFrames(8)))
   {
-    byte temp = textBox[0];          // save the first byte
+    byte temp = charBox[0];          // save the first byte
     for (int i = 0; i < 120; i++)
     {
-      textBox[i] = textBox[i + 1];
+      charBox[i] = charBox[i + 1];
     }
-    textBox[120] = temp;                        // put the saved byte at the end
+    charBox[120] = temp;                        // put the saved byte at the end
   }
 }
 
