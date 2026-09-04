@@ -8,7 +8,7 @@
 
 #define UPPERBIT_OFFSET               4
 #define LEVEL_OFFSET                  1
-#define ROOM_DRAWING_OFFSET           -10         
+#define ROOM_DRAWING_OFFSET           -9         
 
 #define TILE_INFRONT_DOOR_NORTH       2
 #define TILE_INFRONT_DOOR_EAST        10
