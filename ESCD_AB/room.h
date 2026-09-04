@@ -211,6 +211,7 @@ int translateTileToY (byte currentTile)
   return (18 + (currentTile * 6) - ((currentTile / 5) * 24));
 }
 
+
 bool checkIfOnCenterTile (byte coX, byte coY)
 {
   for (byte y = 0; y < 5; y++)
@@ -227,6 +228,33 @@ bool checkIfOnCenterTile (byte coX, byte coY)
 }
 
 
+/*
+bool checkIfOnCenterTile(byte coX, byte coY)
+{
+  byte tx = 51;   // starting X for y=0, x=0
+  byte ty = 18;   // starting Y
+
+  for (byte y = 0; y < 5; y++)
+  {
+    byte cx = tx;
+    byte cy = ty;
+
+    for (byte x = 0; x < 5; x++)
+    {
+      if (coX == cx && coY == cy)
+        return true;
+
+      cx -= 12;
+      cy += 6;
+    }
+
+    tx += 12;
+    ty += 6;
+  }
+
+  return false;
+}
+*/
 
 void enterRoom(byte roomNumber, byte currentLevel)
 {
@@ -396,11 +424,11 @@ void drawTicker()
       //if (setTicker == TEXT_SCROLL_LEFT)
       {
         byte tempChar = charBox[0];          // save the first byte
-          for (int i = 0; i < 120; i++)
+          for (int i = 0; i < 119; i++)
           {
             charBox[i] = charBox[i + 1];
           }
-          charBox[120] = tempChar;
+          charBox[119] = tempChar;
       }
     }
     /*
@@ -411,17 +439,17 @@ void drawTicker()
         case TEXT_SCROLL_LEFT:
           {
             byte tempChar = charBox[0];          // save the first byte
-            for (int i = 0; i < 120; i++)
+            for (int i = 0; i < 119; i++)
             {
               charBox[i] = charBox[i + 1];
             }
-            charBox[120] = tempChar;                        // put the saved byte at the end
+            charBox[119] = tempChar;                        // put the saved byte at the end
           }
           break;
         case TEXT_SCROLL_RIGHT:
           {
             byte tempChar = charBox[120];          // save the first byte
-            for (int i = 120; i > 0; i--)
+            for (int i = 119; i > 0; i--)
             {
               charBox[i] = charBox[i - 1];
             }

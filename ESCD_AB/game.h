@@ -78,7 +78,8 @@ void stateGameNextLevel()
   player.y = translateTileToY (player.isOnTile) + currentRoomY ;
   buildRooms(level);
   enterRoom(currentRoom, level);
-  loadAndFillMessage(1);
+  loadAndFillMessage(0);
+  addNumber(246,5,6);
   gameState = STATE_GAME_PAUSE;
 }
 

@@ -78,6 +78,44 @@ void loadAndFillMessage(uint8_t indexMessage)
   }
 }
 
+void addNumber(unsigned long number, byte charIndex, byte amountLeadingZeros)
+{
+  if (amountLeadingZeros > 6) amountLeadingZeros = 6;
+
+  // Count how many digits the number really has
+  unsigned long temp = number;
+  byte actualDigits = (number == 0) ? 1 : 0;
+  while (temp)
+  {
+    actualDigits++;
+    temp /= 10;
+  }
+
+  // Total digits to write = max(actualDigits, amountLeadingZeros)
+  byte totalDigits = (actualDigits > amountLeadingZeros) ? actualDigits : amountLeadingZeros;
+
+  // Start writing from the rightmost character
+  int writePos = (charIndex + totalDigits - 1) * 4;
+
+  for (byte i = 0; i < totalDigits; i++)
+  {
+    uint8_t digit = number % 10;
+    number /= 10;
+
+    uint8_t idx = (digit + '0') - FONT_OFFSET;
+    uint16_t fontOffset = (uint16_t)idx * 3;
+
+    if (writePos + 2 < sizeof(charBox))
+    {
+      charBox[writePos    ] = pgm_read_byte(&font[fontOffset    ]);
+      charBox[writePos + 1] = pgm_read_byte(&font[fontOffset + 1]);
+      charBox[writePos + 2] = pgm_read_byte(&font[fontOffset + 2]);
+    }
+
+    writePos -= 4;   // previous character
+  }
+}
+
 
 
 #endif
