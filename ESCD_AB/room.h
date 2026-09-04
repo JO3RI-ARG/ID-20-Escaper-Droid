@@ -321,60 +321,23 @@ byte goToTile(byte roomNumber, byte currentLevel)
 
 int setCurrentRoomY(byte currentTile)
 {
-  switch (currentTile)
-  {
-    case TILE_INFRONT_DOOR_NORTH:
-      return -9;
-      break;
-    case TILE_INFRONT_DOOR_EAST:
-      return -9;
-      break;
-    case TILE_INFRONT_DOOR_SOUTH:
-      return -35;
-      break;
-    case TILE_INFRONT_DOOR_WEST:
-      return -35;
-      break;
-    
-  }
+  // SOUTH or WEST → -35, otherwise -9
+  return (currentTile == TILE_INFRONT_DOOR_SOUTH ||
+          currentTile == TILE_INFRONT_DOOR_WEST) ? -35 : -9;
 }
 
 int offsetXAfterDoor(byte currentTile)
 {
-  switch (currentTile)
-  {
-    case TILE_INFRONT_DOOR_NORTH:
-      return -10;
-      break;
-    case TILE_INFRONT_DOOR_EAST:
-      return 10;
-      break;
-    case TILE_INFRONT_DOOR_SOUTH:
-      return 10;
-      break;
-    case TILE_INFRONT_DOOR_WEST:
-      return -10;
-      break;
-  }
+  // EAST or SOUTH → 10, otherwise -10
+  return (currentTile == TILE_INFRONT_DOOR_EAST ||
+          currentTile == TILE_INFRONT_DOOR_SOUTH) ? 10 : -10;
 }
 
 int offsetYAfterDoor(byte currentTile)
 {
-  switch (currentTile)
-  {
-    case TILE_INFRONT_DOOR_NORTH:
-      return -5;
-      break;
-    case TILE_INFRONT_DOOR_EAST:
-      return -5;
-      break;
-    case TILE_INFRONT_DOOR_SOUTH:
-      return 5;
-      break;
-    case TILE_INFRONT_DOOR_WEST:
-      return 5;
-      break;
-  }
+  // SOUTH or WEST → 5, otherwise -5
+  return (currentTile == TILE_INFRONT_DOOR_SOUTH ||
+          currentTile == TILE_INFRONT_DOOR_WEST) ? 5 : -5;
 }
 
 /////////////////  DRAW ROOM    ///////////////////

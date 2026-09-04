@@ -62,7 +62,7 @@ struct Element
     //                       ||└------>  5 this enemy/object can hurt you         (0 = false / 1 = true)
     //                       |└------->  6 this object is movable by player       (0 = false / 1 = true)
     //                       └-------->  7 this object can be picked up by player (0 = false / 1 = true)
-    byte frame;
+    byte frame = 0;
 };
 
 ///// PREPARE ENEMY / ELEMENT / FLOOR ///////
@@ -134,35 +134,17 @@ void drawFloor(byte floor)
   sprites.drawPlusMask(elements[floor].x - 3, elements[floor].y + currentRoomY + 9, floorTile_plus_mask, (elements[floor].characteristics & 0b00000111));
 }
 
-void drawFloorOne()
-{
-  drawFloor(FLOOR_ONE);
-}
-
-void drawFloorTwo()
-{
-  drawFloor(FLOOR_TWO);
-}
-
-void drawFloorThree()
-{
-  drawFloor(FLOOR_THREE);
-}
-
-void drawFloorFour()
-{
-  drawFloor(FLOOR_FOUR);
-}
-
-void drawFloorFive()
-{
-  drawFloor(FLOOR_FIVE);
-}
+// Thin wrappers required by the function-pointer table
+void drawFloorOne()   { drawFloor(FLOOR_ONE);   }
+void drawFloorTwo()   { drawFloor(FLOOR_TWO);   }
+void drawFloorThree() { drawFloor(FLOOR_THREE); }
+void drawFloorFour()  { drawFloor(FLOOR_FOUR);  }
+void drawFloorFive()  { drawFloor(FLOOR_FIVE);  }
 
 
 ///////////////// DRAW ENEMIE BULLET ////////
 /////////////////////////////////////////////
-// We have 1 different bullet types and 1 bullet tiles we can draw
+// We have 1 different bullet types and 1 bullet tile/sprite we can draw
 void drawBulletEnemy()
 {
 

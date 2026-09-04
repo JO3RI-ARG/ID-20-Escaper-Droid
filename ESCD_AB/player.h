@@ -120,7 +120,6 @@ void updatePlayer()
   {
     player.immuneTimer++;
     if (arduboy.everyXFrames(4)) bitToggle(player.characteristics,DROID_VISIBLE_AT_BIT_2);
-    bitToggle(player.characteristics,2);
     if (player.immuneTimer > PLAYER_IMMUNE_TIME)
     {
       bitClear(player.characteristics, DROID_IMMUNE_AT_BIT_3);
