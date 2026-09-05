@@ -3,6 +3,7 @@
 
 #include "globals.h"
 #include "inputs.h"
+#include "text.h"
 
 void stateMenuPlay()
 {
@@ -71,16 +72,26 @@ void stateGameNextRoom()
 void stateGameNextLevel()
 {
   level++;
-  currentRoom = 0;
-  player.isOnTile = TILE_GAME_STARTS_ON;
-  currentRoomY = ROOM_DRAWING_OFFSET;
-  player.x = translateTileToX (player.isOnTile);
-  player.y = translateTileToY (player.isOnTile) + currentRoomY ;
-  buildRooms(level);
-  enterRoom(currentRoom, level);
-  loadAndFillMessage(0);
-  addNumber(246,5,6);
-  gameState = STATE_GAME_PAUSE;
+  if (level > AMOUNT_OF_LEVELS)
+  {
+    loadAndFillMessage(3);
+    addNumber(scorePlayer,24,6);
+    gameState = STATE_GAME_FINISHED;
+  }
+  else
+  {
+    currentRoom = 0;
+    player.isOnTile = TILE_GAME_STARTS_ON;
+    currentRoomY = ROOM_DRAWING_OFFSET;
+    player.x = translateTileToX (player.isOnTile);
+    player.y = translateTileToY (player.isOnTile) + currentRoomY ;
+    buildRooms(level);
+    enterRoom(currentRoom, level);
+    loadAndFillMessage(1);
+    addNumber(level,6,2);
+    addNumber(scorePlayer,14,6);
+    gameState = STATE_GAME_PAUSE;
+  }
 }
 
 
@@ -90,7 +101,11 @@ void stateGamePause()
   drawFloor();
   drawHUD();
   //drawNumbers(43, 54, scorePlayer, BIG_FONT);
-  if (arduboy.justPressed(A_BUTTON | B_BUTTON)) gameState = STATE_GAME_PLAYING;
+  if (arduboy.justPressed(A_BUTTON | B_BUTTON))
+  {
+    loadAndFillMessage(0);
+    gameState = STATE_GAME_PLAYING;
+  }
 }
 
 void stateGameOver()
@@ -98,9 +113,7 @@ void stateGameOver()
   playerDies();
   drawWalls();
   drawFloor();
-  drawHUD();
   drawPlayer();
-  drawNumbers(43, 54, scorePlayer, BIG_FONT);
   if (arduboy.justPressed(A_BUTTON | B_BUTTON)) 
   {
     gameState = STATE_MENU_MAIN;
@@ -127,7 +140,12 @@ void stateGameTransporting()
 
 void stateGameFinished()
 {
-
+  drawWalls();
+  if (arduboy.justPressed(A_BUTTON | B_BUTTON)) 
+  {
+    gameState = STATE_MENU_MAIN;
+    ATM.play(menuSong);
+  }
 }
 
 #endif

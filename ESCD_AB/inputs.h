@@ -61,7 +61,7 @@ void checkInputs()
 
   // ----- B button = Action -----
   if (arduboy.justPressed(B_BUTTON))
-  {
+    {
     // Special case: stand on exit tile → next level
     if (currentRoom == exitRoomLocation && player.isOnTile == TILE_IN_MIDDLE)
     {

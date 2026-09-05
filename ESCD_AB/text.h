@@ -37,10 +37,10 @@ unsigned char charBox[120];
 PROGMEM const char textMessage[] = // each message max 30 characters including spaces
 //"MAXIMUM 30 CHARS IS TILL HERE.\0"
 //"//////////////////////////////\0"
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234\0"
-  "HELLO ARDUBOY\0"
-  "HAVE A NICE DAY\0"
-  "GAME OVER\0";
+  "ALERT ALERT DROID ESCAPING\0"
+  "LEVEL   SCORE       \0"
+  "GAME OVER  :<  SCORE       \0"
+  "DROID ESCAPED :>  SCORE       \0";
 
 void loadAndFillMessage(uint8_t indexMessage)
 {

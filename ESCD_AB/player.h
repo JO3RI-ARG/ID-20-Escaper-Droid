@@ -127,7 +127,12 @@ void updatePlayer()
       player.immuneTimer = 0;
     }
   }
-  else if (bitRead(player.characteristics, DROID_DYING_AT_BIT_4)) gameState = STATE_GAME_OVER;
+  else if (bitRead(player.characteristics, DROID_DYING_AT_BIT_4))
+  {
+    loadAndFillMessage(2);
+    addNumber(scorePlayer,22,6);
+    gameState = STATE_GAME_OVER;
+  }
 }
 
 void playerDies()

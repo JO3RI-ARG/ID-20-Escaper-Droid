@@ -60,6 +60,9 @@
 #define ATM_CUT(amount)						0x54,(amount)
 #define ATM_CUT_OFF							0x55
 
+// WAVEFORM (0 = PULSE, 1 = SQUARE, 2 = NOISE)
+#define ATM_WAVEFORM(type)					0x56,(type)
+
 
 // let's Define all 64 NOTES from C2 up to D7, actually 63 because note 0 means mute or no note
 #define ATM_NOTE_C2       		 0x00 + 1

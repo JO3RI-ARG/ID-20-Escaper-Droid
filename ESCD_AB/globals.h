@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <Arduboy2.h>
 #include <Sprites.h>
-#include <ATMlib.h>
+#include "ATMlib.h"
 #include "bitmaps.h"
 #include "sfx.h"
 #include "song.h"
