@@ -72,6 +72,37 @@ struct EscaperDroid
 
 EscaperDroid player;
 
+#define SHOT_STEPS_PER_TILE  6
+
+struct Shot
+{
+  int x, y;
+  byte dir;
+  byte steps;
+  bool active;
+};
+
+Shot playerShot;
+
+#define SCORE_ENEMY_HIT  75
+
+void deactivatePlayerShot()
+{
+  playerShot.active = false;
+}
+
+void spawnPlayerShot()
+{
+  if (playerShot.active) return;
+  if ((player.assets & 0b00000111) == 0) return;
+  player.assets--;
+  playerShot.active = true;
+  playerShot.steps = 0;
+  playerShot.x = player.x;
+  playerShot.y = player.y - currentRoomY;
+  playerShot.dir = player.characteristics & 0b00000011;
+}
+
 void walkThroughDoor()
 {
   if (bitRead(player.characteristics, DROID_GOES_THROUGH_DOOR_AT_BIT_5) || bitRead(player.characteristics, DROID_COMES_OUT_DOOR_AT_BIT_6)) player.steps++;
@@ -177,7 +208,8 @@ void drawPlayer()
 
 void drawBulletPlayer()
 {
-
+  if (!playerShot.active) return;
+  sprites.drawPlusMask(playerShot.x + 4, playerShot.y + currentRoomY + 6, elements_plus_mask, 18);
 }
 
 

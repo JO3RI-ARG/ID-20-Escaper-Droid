@@ -18,10 +18,10 @@
 #define ENEMY_MOVING              0
 #define ENEMY_SHOTING             1
 
-#define ENEMY_BOX                 0
-#define ENEMY_JUMPER              1
-#define ENEMY_MOVER               2
-#define ENEMY_SHOOTER             3
+#define ENEMY_BOX                 0   // enemies_plus_mask frames 0-3 (facing)
+#define ENEMY_JUMPER              1   // enemies_plus_mask frames 4-7 (bounce)
+#define ENEMY_MOVER               2   // enemies_plus_mask frames 8-11 (facing)
+#define ENEMY_SHOOTER             3   // enemies_plus_mask frames 12-15 (facing)
 
 #define PICKUP_BLACK_CARD         0     // opens level door
 #define PICKUP_WHITE_CARD         1     // opens normal door
@@ -77,7 +77,9 @@ struct Element
 // place 6 FLOOR_FOUR     4 different types
 // place 7 FLOOR_FIVE     4 different types
 // place 8 ENEMY_BULLET   4 different types
-Element elements[8];
+// slots 0-7 are room elements; slot 8 is the live enemy shot
+Element elements[9];
+bool enemyBulletActive = false;
 
 // create a byte for the the object frame
 byte objectFrame = 0;
@@ -100,6 +102,7 @@ void drawEnemies(bool enemyOneOrTwo)
       sprites.drawPlusMask(elements[enemyOneOrTwo].x, elements[enemyOneOrTwo].y + currentRoomY, enemies_plus_mask, 8 + ((elements[enemyOneOrTwo].characteristics & 0b00011000) >> 3));
       break;
     case ENEMY_SHOOTER:
+      sprites.drawPlusMask(elements[enemyOneOrTwo].x, elements[enemyOneOrTwo].y + currentRoomY, enemies_plus_mask, 12 + ((elements[enemyOneOrTwo].characteristics & 0b00011000) >> 3));
       break;
   }
 }
@@ -147,7 +150,8 @@ void drawFloorFive()  { drawFloor(FLOOR_FIVE);  }
 // We have 1 different bullet types and 1 bullet tile/sprite we can draw
 void drawBulletEnemy()
 {
-
+  if (!enemyBulletActive) return;
+  sprites.drawPlusMask(elements[ENEMY_BULLET].x + 4, elements[ENEMY_BULLET].y + currentRoomY + 6, elements_plus_mask, 18);
 }
 
 

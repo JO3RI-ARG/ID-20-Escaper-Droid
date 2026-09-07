@@ -44,7 +44,12 @@ void stateGamePlaying()
     }
   }
   updatePlayer();
-  if (!bitRead(player.characteristics, 4)) updateEnemies();
+  if (!bitRead(player.characteristics, 4))
+  {
+    updateEnemies();
+    updatePlayerShot();
+    updateEnemyShot();
+  }
   drawHUD();
 }
 

@@ -83,12 +83,15 @@ void checkInputs()
     byte objTile = (elements[OBJECT].characteristics & 0b11111000) >> 3;
     int8_t neededTile = player.isOnTile + (int8_t)pgm_read_byte(&dirTileOffset[dir]);
 
+    bool usedAction = (player.isOnTile == pgm_read_byte(&doorTile[dir]));
+
     if (objTile == neededTile)
     {
       if (objType == TELEPORT)
       {
         bitSet(player.characteristics, DROID_TRANSPORTING_AT_BIT_7);
         gameState = STATE_GAME_TRANSPORTING;
+        usedAction = true;
       }
       else if (objType > 5)   // SWITCH_OFF or SWITCH_ON
       {
@@ -96,10 +99,11 @@ void checkInputs()
         byte targetRoom = stageRoom[currentRoom].roomNumberInfluencing;
         byte mask       = stageRoom[currentRoom].elementsInfluenced;
         stageRoom[targetRoom].elementsActive ^= mask;
+        usedAction = true;
       }
     }
 
-    // (future: shoot bullet here)
+    if (!usedAction) spawnPlayerShot();
   }
 }
 
@@ -129,7 +133,8 @@ void updateEnemies()
   {
     elements[i].frame = (elements[i].frame + 1) & 3;   // cheaper than % 4
 
-    if (!pgm_read_byte(&levels[level - 1][ELEMENTS_DATA_START_AT_BYTE + i + (BYTES_USED_FOR_EVERY_ROOM * currentRoom)]))
+    // alive flag is elementsActive, not the original PROGMEM byte
+    if (!bitRead(stageRoom[currentRoom].elementsActive, 7 - i))
       continue;
 
     byte dir = (elements[i].characteristics & 0b00011000) >> 3;
@@ -168,6 +173,9 @@ void updateEnemies()
         break;
 
       case ENEMY_SHOOTER:
+        if (canMove) moveEnemies(elements[i].x, elements[i].y, dir, i);
+        else         enemyTurn(i, TURN_RIGHT);
+        if (arduboy.everyXFrames(48)) spawnEnemyShot(i);
         break;
     }
   }

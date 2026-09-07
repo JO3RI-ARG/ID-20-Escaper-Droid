@@ -258,6 +258,8 @@ bool checkIfOnCenterTile(byte coX, byte coY)
 
 void enterRoom(byte roomNumber, byte currentLevel)
 {
+  playerShot.active = false;
+  enemyBulletActive = false;
   for (byte i = 0; i < 8; i++)
   {
     // first clear the characteristics
@@ -592,6 +594,9 @@ void drawRoom()
   {
     ((FunctionPointer) pgm_read_word (&updateElementsInRoom[itemsOrder[i]]))();
   }
+  // shots are drawn on top so they never replace the player/enemy tile in itemsOrder
+  drawBulletPlayer();
+  drawBulletEnemy();
 }
 
 
@@ -677,6 +682,7 @@ void checkOrderOfObjects(byte roomNumber, byte currentLevel)
   {
    if (bitRead(stageRoom[currentRoom].elementsActive, 7 - i))itemsOrder[tileFromXY(elements[i].x, elements[i].y) + ITEMS_ORDER_TILES_START] = i;
   }
+
 }
 
 void drawNumbers(byte x, byte y, unsigned long numbers, byte fontType)

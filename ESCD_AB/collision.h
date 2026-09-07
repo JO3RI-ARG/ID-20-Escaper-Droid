@@ -2,6 +2,9 @@
 #define COLLISION_H
 
 #include "globals.h"
+#include "elements.h"
+#include "player.h"
+#include "room.h"
 
 boolean hitBorders(int objectX, int objectY, int directionFacing, bool playerOrEnemy)
 {
@@ -210,29 +213,144 @@ void checkObjectTypeAndAct()
 }
 
 
+void playerTouchesHazard()
+{
+  playerLosesLife();
+}
+
+byte floorKind(byte floorSlot)
+{
+  return elements[floorSlot].characteristics & 0b00000111;
+}
+
 void decideOnCollision()
 {
   switch (currentlyOnTestingTile)
   {
     case ENEMY_ONE:
-      break;
     case ENEMY_TWO:
+      playerTouchesHazard();
       break;
     case OBJECT:
       checkObjectTypeAndAct();
       break;
     case FLOOR_ONE:
-      break;
     case FLOOR_TWO:
-      break;
     case FLOOR_THREE:
-      break;
     case FLOOR_FOUR:
-      break;
     case FLOOR_FIVE:
+      {
+        byte kind = floorKind(currentlyOnTestingTile);
+        if (kind == FLOOR_SPIKE || kind == FLOOR_PIT)
+          playerTouchesHazard();
+      }
       break;
-
   }
+}
+
+void stepShot(int &sx, int &sy, byte dir)
+{
+  switch (dir & 0b00000011)
+  {
+    case NORTH: sy -= 1; sx -= 2; break;
+    case EAST:  sy -= 1; sx += 2; break;
+    case SOUTH: sy += 1; sx += 2; break;
+    case WEST:  sy += 1; sx -= 2; break;
+  }
+}
+
+void killEnemy(byte enemySlot)
+{
+  bitClear(stageRoom[currentRoom].elementsActive, 7 - enemySlot);
+  elements[enemySlot].characteristics = 0;
+  scorePlayer += SCORE_ENEMY_HIT;
+}
+
+byte tileOccupant(int ox, int oy)
+{
+  byte t = tileFromXY(ox, oy);
+  if (t >= 25) return EMPTY_PLACE;
+  return itemsOrder[t + ITEMS_ORDER_TILES_START];
+}
+
+bool shotHitsBlockingFloor(byte occupant)
+{
+  if (occupant < FLOOR_ONE || occupant > FLOOR_FIVE) return false;
+  byte kind = floorKind(occupant);
+  if (kind == FLOOR_PIT) return false;
+  if (kind == FLOOR_PIRAMIDE)
+  {
+    bitClear(stageRoom[currentRoom].elementsActive, 7 - occupant);
+    elements[occupant].characteristics = 0;
+    return true;
+  }
+  return (kind == FLOOR_BOX || kind == FLOOR_SPIKE);
+}
+
+bool resolveShotOnTile(int sx, int sy, byte dir, bool fromPlayer)
+{
+  if (hitBorders(sx, sy, dir, ENEMY))
+    return true;
+
+  byte occupant = tileOccupant(sx, sy);
+  if (fromPlayer && (occupant == ENEMY_ONE || occupant == ENEMY_TWO))
+  {
+    killEnemy(occupant);
+    return true;
+  }
+  if (!fromPlayer && occupant == PLAYER_DROID)
+  {
+    playerLosesLife();
+    return true;
+  }
+  if (shotHitsBlockingFloor(occupant) || occupant == OBJECT)
+    return true;
+
+  return false;
+}
+
+void updatePlayerShot()
+{
+  if (!playerShot.active) return;
+  if (!arduboy.everyXFrames(2)) return;
+
+  stepShot(playerShot.x, playerShot.y, playerShot.dir);
+  playerShot.steps++;
+  if (playerShot.steps < SHOT_STEPS_PER_TILE) return;
+  playerShot.steps = 0;
+
+  if (resolveShotOnTile(playerShot.x, playerShot.y, playerShot.dir, true))
+    deactivatePlayerShot();
+}
+
+void spawnEnemyShot(byte enemySlot)
+{
+  if (enemyBulletActive) return;
+  enemyBulletActive = true;
+  elements[ENEMY_BULLET].x = elements[enemySlot].x;
+  elements[ENEMY_BULLET].y = elements[enemySlot].y;
+  elements[ENEMY_BULLET].characteristics = elements[enemySlot].characteristics & 0b00011000;
+  elements[ENEMY_BULLET].frame = 0;
+}
+
+void deactivateEnemyShot()
+{
+  enemyBulletActive = false;
+}
+
+void updateEnemyShot()
+{
+  if (!enemyBulletActive) return;
+  if (!arduboy.everyXFrames(2)) return;
+
+  byte dir = (elements[ENEMY_BULLET].characteristics & 0b00011000) >> 3;
+  stepShot(elements[ENEMY_BULLET].x, elements[ENEMY_BULLET].y, dir);
+  elements[ENEMY_BULLET].frame++;
+  if (elements[ENEMY_BULLET].frame < SHOT_STEPS_PER_TILE) return;
+  elements[ENEMY_BULLET].frame = 0;
+
+  if (resolveShotOnTile(elements[ENEMY_BULLET].x, elements[ENEMY_BULLET].y, dir, false))
+    deactivateEnemyShot();
 }
 
 
