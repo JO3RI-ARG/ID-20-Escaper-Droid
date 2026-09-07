@@ -137,16 +137,16 @@ boolean hitObjects (int objectX, int objectY, int directionFacing, bool playerOr
   switch (directionFacing)
   {
     case NORTH:
-      testingTile = tileFromXY(objectX - 8, objectY - 4);
+      testingTile = tileFromXY(objectX - 12, objectY - 6);
       break;
     case EAST:
-      testingTile = tileFromXY(objectX + 8, objectY - 4);
+      testingTile = tileFromXY(objectX + 12, objectY - 6);
       break;
     case SOUTH:
-      testingTile = tileFromXY(objectX + 6, objectY + 3);
+      testingTile = tileFromXY(objectX + 12, objectY + 6);
       break;
     case WEST:
-      testingTile = tileFromXY(objectX - 6, objectY + 3);
+      testingTile = tileFromXY(objectX - 12, objectY + 6);
       break;
   }
   byte test = tileIsOccupied(testingTile, playerOrEnemy, enemy);
@@ -272,19 +272,15 @@ void decideOnCollision()
         byte kind = floorKind(currentlyOnTestingTile);
         if (kind == FLOOR_BOX)
         {
+          // droid stays on the tile in front; only the box moves
           byte slot = currentlyOnTestingTile;
           byte dir = player.characteristics & 0b00000011;
-          if (tryPushBox(slot, dir))
+          if (!tryPushBox(slot, dir))
           {
-            int ox = player.x, oy = player.y, oc = currentRoomY;
-            walkThroughDoor();
-            byte pTile = tileFromXY(player.x, player.y - currentRoomY);
             byte bTile = tileFromXY(elements[slot].x, elements[slot].y);
+            byte pTile = tileFromXY(player.x, player.y - currentRoomY);
             if (pTile >= 25 || pTile == bTile)
             {
-              player.x = ox;
-              player.y = oy;
-              currentRoomY = oc;
               int8_t behind = (int8_t)bTile;
               if (dir == NORTH) behind += 5;
               else if (dir == EAST) behind += 1;

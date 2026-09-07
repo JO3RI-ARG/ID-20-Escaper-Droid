@@ -592,6 +592,9 @@ void drawRoom()
   {
     ((FunctionPointer) pgm_read_word (&updateElementsInRoom[itemsOrder[i]]))();
   }
+  if (!bitRead(player.characteristics, DROID_GOES_THROUGH_DOOR_AT_BIT_5) &&
+      !bitRead(player.characteristics, DROID_COMES_OUT_DOOR_AT_BIT_6))
+    drawPlayer();
   drawBulletPlayer();
   drawBulletEnemy();
 }
