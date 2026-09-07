@@ -63,6 +63,9 @@
 // WAVEFORM (0 = PULSE, 1 = SQUARE, 2 = NOISE)
 #define ATM_WAVEFORM(type)					0x56,(type)
 
+// Signal the sketch: ATM.check() returns this byte until the next cue or check()
+#define ATM_CUE(value)						0x57,(value)
+
 
 // let's Define all 64 NOTES from C2 up to D7, actually 63 because note 0 means mute or no note
 #define ATM_NOTE_C2       		 0x00 + 1
@@ -134,5 +137,13 @@
 #define ATM_NOTE_C7_      		 0x00 + 62
 #define ATM_NOTE_D7       		 0x00 + 63
 
+
+
+// One-track SFX for ATMsynth::playSfx(track, ch)
+// Example: ATM_SFX_TRACK(sfxJump, ATM_VOL(48), ATM_NOTE_C5, ATM_DELAY(8));
+#ifndef ATM_SFX_TRACK
+#define ATM_SFX_TRACK(name, ...) \
+  const uint8_t name[] PROGMEM = { __VA_ARGS__, ATM_STOP_CHAN }
+#endif
 
 #endif

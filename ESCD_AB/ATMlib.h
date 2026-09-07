@@ -12,6 +12,8 @@
 #define ATM_WAVE_PULSE  0
 #define ATM_WAVE_SQUARE 1
 #define ATM_WAVE_NOISE  2
+#define ATM_WAVE_SAW    3
+#define ATM_WAVE_TRI    4
 #endif
 #ifndef ATM_WAVE_CH0
 #define ATM_WAVE_CH0 ATM_WAVE_PULSE
@@ -24,6 +26,9 @@
 #endif
 #ifndef ATM_WAVE_CH3
 #define ATM_WAVE_CH3 ATM_WAVE_NOISE
+#endif
+#ifndef ATM_ALT_WIRING
+#define ATM_ALT_WIRING 0
 #endif
 
 #define CH_ZERO             0
@@ -48,6 +53,14 @@ class ATMsynth {
     void stop();
     void muteChannel(byte ch);
     void unMuteChannel(byte ch);
+
+    // Play a raw ATM_SFX_TRACK on one channel (music on other channels keeps going)
+    void playSfx(const byte *track, byte ch);
+
+    // Last ATM_CUE byte from the song/SFX (0 = none since last read)
+    uint8_t check();
+    // 1 if last cue equals id (does not clear)
+    uint8_t check(uint8_t id);
 };
 
 typedef struct {
@@ -98,6 +111,24 @@ extern void ATM_playroutine() asm("ATM_playroutine");
                 "neg  r27                                         " "\n\t" \
                 "add  r26,                   r27                  " "\n\t"
 
+#define ATM__MIX_SAW(N) \
+                "lds  r18,                   osc+" #N "*%[mul]+%[pha]+1" "\n\t" \
+                "subi r18,                   128                  " "\n\t" \
+                "lds  r27,                   osc+" #N "*%[mul]+%[vol]  " "\n\t" \
+                "muls r18,                   r27                  " "\n\t" \
+                "add  r26,                   r1                   " "\n\t"
+
+#define ATM__MIX_TRI(N) \
+                "lds  r18,                   osc+" #N "*%[mul]+%[pha]+1" "\n\t" \
+                "sbrc r18,                   7                    " "\n\t" \
+                "com  r18                                         " "\n\t" \
+                "lsl  r18                                         " "\n\t" \
+                "subi r18,                   128                  " "\n\t" \
+                "lds  r27,                   osc+" #N "*%[mul]+%[vol]  " "\n\t" \
+                "muls r18,                   r27                  " "\n\t" \
+                "add  r26,                   r1                   " "\n\t"
+
+
 #if (ATM_WAVE_CH0 == ATM_WAVE_NOISE) || (ATM_WAVE_CH1 == ATM_WAVE_NOISE) || (ATM_WAVE_CH2 == ATM_WAVE_NOISE) || (ATM_WAVE_CH3 == ATM_WAVE_NOISE)
 #define ATM__NEED_NOISE 1
 #else
@@ -108,6 +139,10 @@ extern void ATM_playroutine() asm("ATM_playroutine");
 #define ATM__CH0 ATM__PHASE(0) ATM__MIX_PULSE(0)
 #elif ATM_WAVE_CH0 == ATM_WAVE_SQUARE
 #define ATM__CH0 ATM__PHASE(0) ATM__MIX_SQUARE(0)
+#elif ATM_WAVE_CH0 == ATM_WAVE_SAW
+#define ATM__CH0 ATM__PHASE(0) ATM__MIX_SAW(0)
+#elif ATM_WAVE_CH0 == ATM_WAVE_TRI
+#define ATM__CH0 ATM__PHASE(0) ATM__MIX_TRI(0)
 #else
 #define ATM__CH0 ATM__MIX_NOISE(0)
 #endif
@@ -116,6 +151,10 @@ extern void ATM_playroutine() asm("ATM_playroutine");
 #define ATM__CH1 ATM__PHASE(1) ATM__MIX_PULSE(1)
 #elif ATM_WAVE_CH1 == ATM_WAVE_SQUARE
 #define ATM__CH1 ATM__PHASE(1) ATM__MIX_SQUARE(1)
+#elif ATM_WAVE_CH1 == ATM_WAVE_SAW
+#define ATM__CH1 ATM__PHASE(1) ATM__MIX_SAW(1)
+#elif ATM_WAVE_CH1 == ATM_WAVE_TRI
+#define ATM__CH1 ATM__PHASE(1) ATM__MIX_TRI(1)
 #else
 #define ATM__CH1 ATM__MIX_NOISE(1)
 #endif
@@ -124,6 +163,10 @@ extern void ATM_playroutine() asm("ATM_playroutine");
 #define ATM__CH2 ATM__PHASE(2) ATM__MIX_PULSE(2)
 #elif ATM_WAVE_CH2 == ATM_WAVE_SQUARE
 #define ATM__CH2 ATM__PHASE(2) ATM__MIX_SQUARE(2)
+#elif ATM_WAVE_CH2 == ATM_WAVE_SAW
+#define ATM__CH2 ATM__PHASE(2) ATM__MIX_SAW(2)
+#elif ATM_WAVE_CH2 == ATM_WAVE_TRI
+#define ATM__CH2 ATM__PHASE(2) ATM__MIX_TRI(2)
 #else
 #define ATM__CH2 ATM__MIX_NOISE(2)
 #endif
@@ -132,6 +175,10 @@ extern void ATM_playroutine() asm("ATM_playroutine");
 #define ATM__CH3 ATM__PHASE(3) ATM__MIX_PULSE(3)
 #elif ATM_WAVE_CH3 == ATM_WAVE_SQUARE
 #define ATM__CH3 ATM__PHASE(3) ATM__MIX_SQUARE(3)
+#elif ATM_WAVE_CH3 == ATM_WAVE_SAW
+#define ATM__CH3 ATM__PHASE(3) ATM__MIX_SAW(3)
+#elif ATM_WAVE_CH3 == ATM_WAVE_TRI
+#define ATM__CH3 ATM__PHASE(3) ATM__MIX_TRI(3)
 #else
 #define ATM__CH3 ATM__MIX_NOISE(3)
 #endif
@@ -156,6 +203,17 @@ extern void ATM_playroutine() asm("ATM_playroutine");
 #define ATM__LFSR
 #define ATM__PUSH_N
 #define ATM__POP_N
+#endif
+
+#if ATM_ALT_WIRING
+#define ATM__PWM_STORE \
+                "sts  %[reg],                r26                  " "\n\t" \
+                "sts  %[reg2],               r26                  " "\n\t"
+#define ATM__PWM_REG2 [reg2] "M" _SFR_MEM_ADDR(OCR4D),
+#else
+#define ATM__PWM_STORE \
+                "sts  %[reg],                r26                  " "\n\t"
+#define ATM__PWM_REG2
 #endif
 
 #define ATMLIB_CONSTRUCT_ISR(TARGET_REGISTER) \
@@ -239,6 +297,7 @@ ISR(TIMER4_OVF_vect, ISR_NAKED) { \
                 "reti                                             " "\n\t" \
                 : \
                 : [reg]  "M" _SFR_MEM_ADDR(TARGET_REGISTER), \
+                  ATM__PWM_REG2 \
                   [mul]  "M" (sizeof(Oscillator)), \
                   [pha]  "M" (offsetof(Oscillator, phase)), \
                   [fre]  "M" (offsetof(Oscillator, freq)), \

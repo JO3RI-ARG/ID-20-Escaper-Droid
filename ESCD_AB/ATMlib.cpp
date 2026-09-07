@@ -25,6 +25,9 @@ extern uint16_t cia;
 
 // Exports
 osc_t __attribute__((used)) osc[4];
+uint8_t atmCue;
+uint8_t atmScorePaused;
+uint8_t atmSfxMask;
 
 // Waveform types per channel: 0=PULSE, 1=SQUARE, 2=NOISE
 // Defaults: Ch0=PULSE, Ch1=SQUARE, Ch2=PULSE, Ch3=NOISE
@@ -113,6 +116,9 @@ void ATMsynth::play(const byte *song) {
   // cleanUp stuff first
   memset(channel, 0, sizeof(channel));
   ChannelActiveMute = 0b11110000;
+  atmCue = 0;
+  atmScorePaused = 0;
+  atmSfxMask = 0;
   // Default waveforms: Ch0=PULSE, Ch1=SQUARE, Ch2=PULSE, Ch3=NOISE
   // Initializes ATMsynth
   // Sets sample rate and tick rate
@@ -127,6 +133,10 @@ void ATMsynth::play(const byte *song) {
   TCCR4B = 0b00000001;    // 62500Hz
   OCR4C  = 0xFF;          // Resolution to 8-bit (TOP=0xFF)
   OCR4A  = 0x80;
+#if ATM_ALT_WIRING
+  TCCR4C = 0b01000101;
+  OCR4D  = 0x80;
+#endif
 
   // Load a melody stream and start grinding samples
   // Read track count
@@ -147,11 +157,21 @@ void ATMsynth::stop() {
   TIMSK4 = 0; // Disable interrupt
   memset(channel, 0, sizeof(channel));
   ChannelActiveMute = 0b11110000;
+  atmCue = 0;
+  atmScorePaused = 0;
+  atmSfxMask = 0;
 }
 
 // Start grinding samples or Pause playback
 void ATMsynth::playPause() {
-  TIMSK4 = TIMSK4 ^ 0b00000100; // toggle disable/enable interrupt
+  atmScorePaused ^= 1;
+  if (atmScorePaused) {
+    for (byte n = 0; n < 4; n++) {
+      if (!(atmSfxMask & (1 << n))) osc[n].vol = 0;
+    }
+  } else {
+    TIMSK4 |= 0b00000100;
+  }
 }
 
 // Toggle mute on/off on a channel, so it can be used for sound effects
@@ -164,6 +184,35 @@ void ATMsynth::unMuteChannel(byte ch) {
   ChannelActiveMute &= (~(1 << 0 ));
 }
 
+void ATMsynth::playSfx(const byte *track, byte ch) {
+  if (ch > 3) return;
+
+  if (!(TIMSK4 & 0b00000100)) {
+    tickRate = tickRate ? tickRate : 25;
+    cia = 15625 / tickRate;
+    cia_count = 1;
+    osc[3].freq = 0x0001;
+    channel[3].freq = 0x0001;
+    TCCR4A = 0b01000010;
+    TCCR4B = 0b00000001;
+    OCR4C  = 0xFF;
+    OCR4A  = 0x80;
+#if ATM_ALT_WIRING
+    TCCR4C = 0b01000101;
+    OCR4D  = 0x80;
+#endif
+  }
+
+  memset(&channel[ch], 0, sizeof(channel[ch]));
+  channel[ch].ptr = track;
+  ChannelActiveMute |= (uint8_t)(1 << (ch + 4));
+  ChannelActiveMute &= (uint8_t)(~(1 << ch));
+  if (ch == 3) osc[3].freq = 0x0001;
+  atmSfxMask |= (uint8_t)(1 << ch);
+
+  TIMSK4 |= 0b00000100;
+}
+
 
 __attribute__((used))
 void ATM_playroutine() {
@@ -173,6 +222,11 @@ void ATM_playroutine() {
   for (byte n = 0; n < 4; n++)
   {
     ch = &channel[n];
+
+    if (atmScorePaused && !(atmSfxMask & (1 << n))) {
+      osc[n].vol = 0;
+      continue;
+    }
 
     // Noise retriggering: reseed the LFSR (always osc[3].freq in the ISR)
     if (ch->reConfig) {
@@ -321,6 +375,9 @@ void ATM_playroutine() {
             case 21: // Note Cut OFF
               ch->arpNotes = 0;
               break;
+            case 23: // CUE: store a byte for the sketch
+              atmCue = pgm_read_byte(ch->ptr++);
+              break;
             case 92: // ADD tempo
               tickRate += pgm_read_byte(ch->ptr++);
               cia = 15625 / tickRate;
@@ -336,6 +393,7 @@ void ATM_playroutine() {
               ChannelActiveMute = ChannelActiveMute ^ (1 << (n + 4));
               ch->vol = 0;
               ch->delay = 0xFFFF;
+              atmSfxMask &= (uint8_t)(~(1 << n));
               break;
           }
         } else if (cmd < 224) {
@@ -422,4 +480,13 @@ void ATM_playroutine() {
       }
     }
   }
+}
+uint8_t ATMsynth::check() {
+  uint8_t v = atmCue;
+  atmCue = 0;
+  return v;
+}
+
+uint8_t ATMsynth::check(uint8_t id) {
+  return atmCue == id;
 }
