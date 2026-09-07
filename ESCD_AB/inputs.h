@@ -86,7 +86,7 @@ void checkInputs()
       else if (objType > 5)
       {
         bitToggle(elements[OBJECT].characteristics, 0);
-        bitToggle(stageRoom[currentRoom].roomNumberFromInfluencer, 7);
+        bitToggle(stageRoom[currentRoom].roomToTransportTo, 7);   // remember lever state
         byte targetRoom = stageRoom[currentRoom].roomNumberInfluencing & 0b00111111;
         byte mask       = stageRoom[currentRoom].elementsInfluenced;
         stageRoom[targetRoom].elementsActive ^= mask;

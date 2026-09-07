@@ -88,12 +88,13 @@ struct Room {
       roomToTransportTo = 0b00000000;
       //                    |||||||└->  \
       //                    ||||||└-->   |
-      //                    |||||└--->   | these 6 bits are used for the roomnumber you'll go to
+      //                    |||||└--->   | these 6 bits are the room number a teleport goes to
       //                    ||||└---->   |
       //                    |||└----->   |
       //                    ||└------>  /
       //                    |└-------> NOT USED
-      //                    └--------> NOT USED
+      //                    └--------> SWITCH IS ON (persists when you leave the room)
+      //                               a room is either a teleport OR a switch, never both
 
       roomNumberInfluencing = 0b00000000;
       //                        |||||||└->0  \
@@ -170,11 +171,12 @@ void buildRooms(byte currentLevel)
     if ((pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + OBJECT + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]) & 0b00000111) > TELEPORT)
     {
       stageRoom[roomNumber].roomNumberInfluencing = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][influenceDataAtByte + influenceDataCounter]);
-      stageRoom[roomNumber].roomNumberFromInfluencer = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][influenceDataAtByte + influenceDataCounter + 1]);
+      // influence record is still 3 bytes in the level data; the middle "from room"
+      // byte is unused by the engine and is skipped to save RAM
       stageRoom[roomNumber].elementsInfluenced = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][influenceDataAtByte + influenceDataCounter + 2]);
       influenceDataCounter += 3;
       if ((pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + OBJECT + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]) & 0b00000111) == SWITCH_ON)
-        bitSet(stageRoom[roomNumber].roomNumberFromInfluencer, 7);
+        bitSet(stageRoom[roomNumber].roomToTransportTo, 7);
     }
   }
 }
@@ -216,47 +218,18 @@ int translateTileToY (byte currentTile)
 
 bool checkIfOnCenterTile (byte coX, byte coY)
 {
-  for (byte y = 0; y < 5; y++)
-  {
-    for (byte x = 0; x < 5; x++)
-    {
-      if (coX == 3 + (48 - (12 * x) + (12 * y)) && (coY == (27 + (6 * x) + (6 * y)) - 9))
-      {
-        return true;
-      }
-    }
-  }
-  return false;
+  // tile centers: x = 3 + 12*(4 + row - col), y = 18 + 6*(row + col)
+  byte dx = coX - 3;
+  byte dy = coY - 18;
+  if (dx > 96 || dy > 48 || (dx % 12) || (dy % 6)) return false;
+  int8_t a = dx / 12;
+  int8_t b = dy / 6;
+  int8_t row = a + b - 4;
+  if (row & 1) return false;
+  row >>= 1;
+  int8_t col = b - row;
+  return (row >= 0 && row < 5 && col >= 0 && col < 5);
 }
-
-
-/*
-bool checkIfOnCenterTile(byte coX, byte coY)
-{
-  byte tx = 51;   // starting X for y=0, x=0
-  byte ty = 18;   // starting Y
-
-  for (byte y = 0; y < 5; y++)
-  {
-    byte cx = tx;
-    byte cy = ty;
-
-    for (byte x = 0; x < 5; x++)
-    {
-      if (coX == cx && coY == cy)
-        return true;
-
-      cx -= 12;
-      cy += 6;
-    }
-
-    tx += 12;
-    ty += 6;
-  }
-
-  return false;
-}
-*/
 
 void enterRoom(byte roomNumber, byte currentLevel)
 {
@@ -276,7 +249,7 @@ void enterRoom(byte roomNumber, byte currentLevel)
   }
   if ((elements[OBJECT].characteristics & 0b00000111) >= SWITCH_OFF)
   {
-    if (bitRead(stageRoom[roomNumber].roomNumberFromInfluencer, 7))
+    if (bitRead(stageRoom[roomNumber].roomToTransportTo, 7))
       bitSet(elements[OBJECT].characteristics, 0);
     else
       bitClear(elements[OBJECT].characteristics, 0);
@@ -285,7 +258,7 @@ void enterRoom(byte roomNumber, byte currentLevel)
 
 byte transportToRoom (byte roomNumber)
 {
-  return stageRoom[roomNumber].roomToTransportTo;
+  return stageRoom[roomNumber].roomToTransportTo & 0b00111111;
 }
 
 

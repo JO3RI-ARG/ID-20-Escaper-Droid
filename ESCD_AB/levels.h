@@ -246,45 +246,14 @@ const unsigned char PROGMEM level02[] =
   0b00000011,  0b00000011, 0b00011111,
 };
 
-const unsigned char PROGMEM level03[] =
-{
-  8,          // amount of rooms
-  2,          // amount of transporters
-  2,          // amount of rooms with influenceable objects
-
-  // NEXT LEVEL DOOR
-  0b0000000,  // data about the door and room that gets you to the next level
-
-  // NEXT LEVEL ROOM
-  0b0000010,  // data about which room gets you to the next level
-
-  // ALL THE DATA FOR EACH ROOM AND EACH ROOM HAS 13 BYTES
-  // DOORS         NORTH       EAST       SOUTH       WEST         ENEMY1      ENEMY2        OBJECT3       FLOOR1      FLOOR2      FLOOR3      FLOOR4      FLOOR5
-  0b00100000,   0b00000000, 0b00000111, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b00000000,   0b00000011, 0b00100011, 0b11000011, 0b10100011, 0b00000000, // room00
-  0b11010001,   0b00001010, 0b00000000, 0b00001100, 0b00000001,   0b00001000, 0b00000000,   0b00000000,   0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room01
-  0b01000000,   0b00000000, 0b00000000, 0b00000100, 0b00000000,   0b00000000, 0b00000000,   0b00000000,   0b01011011, 0b01101011, 0b00000000, 0b00000000, 0b00000000, // room02
-  0b00110000,   0b00000110, 0b00010011, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b00000000,   0b00110011, 0b01000011, 0b10000011, 0b10010011, 0b00000000, // room03
-
-  0b11000000,   0b00000000, 0b00000000, 0b00010100, 0b00001101,   0b00000001, 0b00000000,   0b00000000,   0b00110100, 0b01000100, 0b10000100, 0b10010100, 0b00000000, // room04
-  0b01010000,   0b00010010, 0b00000000, 0b00011000, 0b00000000,   0b00000000, 0b00000000,   0b00000000,   0b00001011, 0b00011011, 0b01100100, 0b10101011, 0b10111011, // room05
-  0b10010000,   0b00010110, 0b00000000, 0b00000000, 0b00011101,   0b00110000, 0b00000000,   0b00000000,   0b10101011, 0b10011011, 0b00011011, 0b00101011, 0b00000000, // room06
-  0b00100000,   0b00000000, 0b00011011, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b01110000,   0b00110100, 0b01000100, 0b10000100, 0b10010100, 0b01101011, // room07
-
-  // transporters data, the order of the data is by ascending numbers (ROOM X, ROOM Y, ROOM Z , ...)
-  // GOTO ROOM
-  //0b00000001,
-  //0b00000100,
-
-  // data about the elements that get influenced
-  // ELEMENTS    OBJECT       WHAT
-  // IN ROOM    AT  ROOM    ELEMENTS
-  //0b00000011,  0b00000011, 0b00011111,
-  //0b00000010,  0b00000100, 0b00000111,
-};
+// level03 used to be a copy of level01. The pointer table reuses level01
+// until you add a distinct map. The room-data format above is unchanged.
 
 const unsigned char *levels[] =
 {
-  level01, level02, level03,
+  // level 3 currently reuses level 1 data (placeholder).
+  // add a real level03[] array here when you author a new map.
+  level01, level02, level01,
 };
 
 

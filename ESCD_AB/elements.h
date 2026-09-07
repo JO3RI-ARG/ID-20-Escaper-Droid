@@ -68,7 +68,14 @@ void drawEnemyTwo() { drawEnemies(ENEMY_TWO); }
 void drawObject()
 {
   if (arduboy.everyXFrames(8)) elements[OBJECT].frame = (++elements[OBJECT].frame) % 6;
-  sprites.drawPlusMask(elements[OBJECT].x + 4, elements[OBJECT].y + currentRoomY + 6, elements_plus_mask, elements[OBJECT].frame + (6 * ((elements[OBJECT].characteristics & 0b00000111))));
+  byte type = elements[OBJECT].characteristics & 0b00000111;
+  byte fr = elements[OBJECT].frame;
+  if (type >= SWITCH_OFF)
+    sprites.drawPlusMask(elements[OBJECT].x + 4, elements[OBJECT].y + currentRoomY + 6,
+                         switch_plus_mask, ((type - SWITCH_OFF) << 1) | (fr >= 3));
+  else
+    sprites.drawPlusMask(elements[OBJECT].x + 4, elements[OBJECT].y + currentRoomY + 6,
+                         elements_plus_mask, fr + (6 * type));
 }
 
 void drawFloor(byte floor)
