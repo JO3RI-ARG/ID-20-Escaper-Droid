@@ -26,7 +26,8 @@
 #define DROID_BATTERY_VISIBLE_AT_BIT_6    6
 #define MAX_ROOM_Y_SCROLLING            -28
 
-
+#define SHOT_STEPS_PER_TILE  6
+#define SCORE_ENEMY_HIT      75
 
 struct EscaperDroid
 {
@@ -42,26 +43,8 @@ struct EscaperDroid
 
     void set()
     {
-      characteristics = 0b00000110;   //this byte holds all the Escaperdroids characteristics
-      //                  ||||||||
-      //                  |||||||└->  0  | this 2 bits are used for direction
-      //                  ||||||└-->  1  | 00 = NORTH / 01 = EAST / 10 = SOUTH / 11 = WEST
-      //                  |||||└--->  2  The droid is visible                   (0 = false / 1 = true)
-      //                  ||||└---->  3  The droid is immune                    (0 = false / 1 = true)
-      //                  |||└----->  4  The droid is dying                     (0 = false / 1 = true)
-      //                  ||└------>  5  The droid is going through a door      (0 = false / 1 = true)
-      //                  |└------->  6  The droid is coming out a door         (0 = false / 1 = true)
-      //                  └-------->  7  the droid is transporting              (0 = false / 1 = true)
+      characteristics = 0b00000110;
       assets = 0b01000000;
-      //         ||||||||
-      //         |||||||└->  0  \ 
-      //         ||||||└-->  1   | this 3 bits are used for amount of shots (0 - 7)
-      //         |||||└--->  2  /
-      //         ||||└---->  3  \
-      //         |||└----->  4   | this 2 bits are used for amount of white cards (0 - 3)
-      //         ||└------>  5  -- the droid has a black card                   (0 = false / 1 = true)
-      //         |└------->  6  -- the droid's battery meter is visible         (0 = false / 1 = true)
-      //         └-------->  7  -- RESERVED
       isOnTile = TILE_GAME_STARTS_ON;
       steps = 0;
       life = 3;
@@ -72,8 +55,6 @@ struct EscaperDroid
 
 EscaperDroid player;
 
-#define SHOT_STEPS_PER_TILE  6
-
 struct Shot
 {
   int x, y;
@@ -83,8 +64,6 @@ struct Shot
 };
 
 Shot playerShot;
-
-#define SCORE_ENEMY_HIT  75
 
 void deactivatePlayerShot()
 {
@@ -139,8 +118,8 @@ void playerLosesLife()
     bitSet(player.characteristics, DROID_IMMUNE_AT_BIT_3);
     if (player.life < 1)
     {
-      bitSet(player.characteristics, DROID_DYING_AT_BIT_4);                              // set droid is dying
-      bitClear(player.characteristics, DROID_IMMUNE_AT_BIT_3);                           // set droid not immune
+      bitSet(player.characteristics, DROID_DYING_AT_BIT_4);
+      bitClear(player.characteristics, DROID_IMMUNE_AT_BIT_3);
     }
   }
 }
@@ -185,10 +164,8 @@ void playerTransporting()
     bitClear(player.characteristics,DROID_TRANSPORTING_AT_BIT_7);
     player.transportTimer = 0;
     gameState = STATE_GAME_PLAYING;
-
   }
 }
-
 
 void drawPlayer()
 {
@@ -211,6 +188,5 @@ void drawBulletPlayer()
   if (!playerShot.active) return;
   sprites.drawPlusMask(playerShot.x + 4, playerShot.y + currentRoomY + 6, elements_plus_mask, 18);
 }
-
 
 #endif

@@ -173,6 +173,8 @@ void buildRooms(byte currentLevel)
       stageRoom[roomNumber].roomNumberFromInfluencer = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][influenceDataAtByte + influenceDataCounter + 1]);
       stageRoom[roomNumber].elementsInfluenced = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][influenceDataAtByte + influenceDataCounter + 2]);
       influenceDataCounter += 3;
+      if ((pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + OBJECT + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]) & 0b00000111) == SWITCH_ON)
+        bitSet(stageRoom[roomNumber].roomNumberFromInfluencer, 7);
     }
   }
 }
@@ -262,26 +264,22 @@ void enterRoom(byte roomNumber, byte currentLevel)
   enemyBulletActive = false;
   for (byte i = 0; i < 8; i++)
   {
-    // first clear the characteristics
     elements[i].characteristics = 0;
-    // and now start reading all the data 
     if (bitRead (stageRoom[roomNumber].elementsActive, 7 - i))
     {
-      // set all enemies at there position
-      // set elements on correct place 0 => 24)
       byte currentTile = (pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + i + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)])) >> 3;
-      elements[i].characteristics = ((pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + i + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]))); //& 0b00000111);
+      elements[i].characteristics = ((pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + i + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)])));
       if (currentTile > 24) elements[i].characteristics = 0;
       elements[i].x = translateTileToX(currentTile);
       elements[i].y = translateTileToY(currentTile);
-        // get all the data stored in level data for each element (what tile it is on and white sprite to use)
-      
-      // we will always set the current direction to EAST (0b00001000)
-      //bitSet (elements[i].characteristics, 3);
-
-      //set the elements hurt/movable/pickup
-
     }
+  }
+  if ((elements[OBJECT].characteristics & 0b00000111) >= SWITCH_OFF)
+  {
+    if (bitRead(stageRoom[roomNumber].roomNumberFromInfluencer, 7))
+      bitSet(elements[OBJECT].characteristics, 0);
+    else
+      bitClear(elements[OBJECT].characteristics, 0);
   }
 }
 
@@ -594,7 +592,6 @@ void drawRoom()
   {
     ((FunctionPointer) pgm_read_word (&updateElementsInRoom[itemsOrder[i]]))();
   }
-  // shots are drawn on top so they never replace the player/enemy tile in itemsOrder
   drawBulletPlayer();
   drawBulletEnemy();
 }
@@ -649,6 +646,12 @@ void checkOrderOfObjects(byte roomNumber, byte currentLevel)
   //determine what is on the tiles
   //******************************
   // check what tile the player is on (so that we can determine what order things need to be displayed)
+  // elements first, then the droid so a box on the same tile cannot hide him
+  for (byte i = 0; i < 8; i++)
+  {
+   if (bitRead(stageRoom[currentRoom].elementsActive, 7 - i))itemsOrder[tileFromXY(elements[i].x, elements[i].y) + ITEMS_ORDER_TILES_START] = i;
+  }
+
   if (!bitRead(player.characteristics, DROID_GOES_THROUGH_DOOR_AT_BIT_5) && !bitRead(player.characteristics, DROID_COMES_OUT_DOOR_AT_BIT_6))
   {
     itemsOrder[player.isOnTile + ITEMS_ORDER_TILES_START] = PLAYER_DROID;
@@ -675,14 +678,6 @@ void checkOrderOfObjects(byte roomNumber, byte currentLevel)
         break;
     }
   }
-
-  // check what tile the 5 special floor tiles are on (so that we can determine what order things need to be displayed)
-  // check what tile the 8 elements are on  (so that we can determine what order things need to be displayed)
-  for (byte i = 0; i < 8; i++)
-  {
-   if (bitRead(stageRoom[currentRoom].elementsActive, 7 - i))itemsOrder[tileFromXY(elements[i].x, elements[i].y) + ITEMS_ORDER_TILES_START] = i;
-  }
-
 }
 
 void drawNumbers(byte x, byte y, unsigned long numbers, byte fontType)

@@ -13,11 +13,8 @@ PROGMEM const unsigned char buttonScheme[] = {
   LEFT_BUTTON, UP_BUTTON, RIGHT_BUTTON, DOWN_BUTTON
 };
 
-// Relative tile offsets for teleport / switch when facing a direction
-// NORTH=-5, EAST=-1, SOUTH=+5, WEST=+1
 PROGMEM const int8_t dirTileOffset[] = { -5, -1, 5, 1 };
 
-// Door tiles in front of the player for each direction
 PROGMEM const byte doorTile[] = {
   TILE_INFRONT_DOOR_NORTH,
   TILE_INFRONT_DOOR_EAST,
@@ -27,13 +24,12 @@ PROGMEM const byte doorTile[] = {
 
 void checkInputs()
 {
-  // ----- Movement (every 2 frames) -----
   if (arduboy.everyXFrames(2))
   {
     byte testingTile = tileFromXY(player.x, player.y - currentRoomY);
     if (testingTile < 25) player.isOnTile = testingTile;
 
-    byte dir = 255;   // 255 = no direction pressed
+    byte dir = 255;
 
     if      (arduboy.pressed(pgm_read_byte(&buttonScheme[NORTH + buttonSchemeOffset]))) dir = NORTH;
     else if (arduboy.pressed(pgm_read_byte(&buttonScheme[EAST  + buttonSchemeOffset]))) dir = EAST;
@@ -42,7 +38,6 @@ void checkInputs()
 
     if (dir != 255)
     {
-      // Set facing direction (lowest 2 bits)
       player.characteristics = (player.characteristics & 0b11111100) | dir;
 
       if (!checkborderHit(player.x, player.y, dir))
@@ -55,30 +50,25 @@ void checkInputs()
     }
   }
 
-  // ----- A button = Pause -----
   if (arduboy.justPressed(A_BUTTON))
     gameState = STATE_GAME_PAUSE;
 
-  // ----- B button = Action -----
   if (arduboy.justPressed(B_BUTTON))
     {
-    // Special case: stand on exit tile → next level
     if (currentRoom == exitRoomLocation && player.isOnTile == TILE_IN_MIDDLE)
     {
       gameState = STATE_GAME_NEXT_LEVEL;
       return;
     }
 
-    byte dir = player.characteristics & 0b00000011;   // current facing
+    byte dir = player.characteristics & 0b00000011;
 
-    // Open normal / level door if standing in front of it
     if (player.isOnTile == pgm_read_byte(&doorTile[dir]))
     {
       playerChecksAndOpensDoor(dir);
       playerChecksAndOpensLevelDoor(dir);
     }
 
-    // Teleport or Switch
     byte objType = elements[OBJECT].characteristics & 0b00000111;
     byte objTile = (elements[OBJECT].characteristics & 0b11111000) >> 3;
     int8_t neededTile = player.isOnTile + (int8_t)pgm_read_byte(&dirTileOffset[dir]);
@@ -93,10 +83,11 @@ void checkInputs()
         gameState = STATE_GAME_TRANSPORTING;
         usedAction = true;
       }
-      else if (objType > 5)   // SWITCH_OFF or SWITCH_ON
+      else if (objType > 5)
       {
         bitToggle(elements[OBJECT].characteristics, 0);
-        byte targetRoom = stageRoom[currentRoom].roomNumberInfluencing;
+        bitToggle(stageRoom[currentRoom].roomNumberFromInfluencer, 7);
+        byte targetRoom = stageRoom[currentRoom].roomNumberInfluencing & 0b00111111;
         byte mask       = stageRoom[currentRoom].elementsInfluenced;
         stageRoom[targetRoom].elementsActive ^= mask;
         usedAction = true;

@@ -102,7 +102,7 @@
 //  ||||||||    ||||||||                                        ||||||||                |└------->6   |
 //  ||||||||    ||||||||                                        ||||||||                └-------->7  /   if all 8 bits == 0 => no object
 //  ||||||||    ||||||||                                        |||||||| 
-//  ||||||||    ||||||||                                        |||||||└->0  \   these 3 bits are used to determine kind of sprite used for the enemy
+//  ||||||||    ||||||||                                        |||||||└->0  \   hese 3 bits are used to determine kind of sprite used for the enemy
 //  ||||||||    ||||||||                                        ||||||└-->1   |  0 = BOX; 1 = FLYER; 2 = MOVER; 3 = SHOOTER;
 //  ||||||||    ||||||||                                        |||||└--->2  /
 //  ||||||||    ||||||||                                        ||||└---->3  \
