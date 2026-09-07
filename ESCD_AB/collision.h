@@ -248,15 +248,16 @@ void decideOnCollision()
   }
 }
 
+void isoStep(int &x, int &y, byte dir)
+{
+  dir &= 3;
+  x += (dir == EAST || dir == SOUTH) ? 2 : -2;
+  y += (dir > EAST) ? 1 : -1;
+}
+
 void stepShot(int &sx, int &sy, byte dir)
 {
-  switch (dir & 0b00000011)
-  {
-    case NORTH: sy -= 1; sx -= 2; break;
-    case EAST:  sy -= 1; sx += 2; break;
-    case SOUTH: sy += 1; sx += 2; break;
-    case WEST:  sy += 1; sx -= 2; break;
-  }
+  isoStep(sx, sy, dir);
 }
 
 void killEnemy(byte enemySlot)
@@ -295,6 +296,8 @@ bool resolveShotOnTile(int sx, int sy, byte dir, bool fromPlayer)
   byte occupant = tileOccupant(sx, sy);
   if (fromPlayer && (occupant == ENEMY_ONE || occupant == ENEMY_TWO))
   {
+    if ((elements[occupant].characteristics & 0b00000111) == ENEMY_MOVER)
+      return false;   // hoverer: shots pass over
     killEnemy(occupant);
     return true;
   }

@@ -15,13 +15,10 @@
 
 #define ENEMY                     0
 
-#define ENEMY_MOVING              0
-#define ENEMY_SHOTING             1
-
-#define ENEMY_BOX                 0   // enemies_plus_mask frames 0-3 (facing)
-#define ENEMY_JUMPER              1   // enemies_plus_mask frames 4-7 (bounce)
-#define ENEMY_MOVER               2   // enemies_plus_mask frames 8-11 (facing)
-#define ENEMY_SHOOTER             3   // enemies_plus_mask frames 12-15 (facing)
+#define ENEMY_BOX                 0   // enemies_plus_mask frames 0-3  (N,E,S,W)
+#define ENEMY_FLYER               1   // enemies_plus_mask frames 4-7  (N,E,S,W)
+#define ENEMY_MOVER               2   // enemies_plus_mask frames 8-11 (N,E,S,W)
+#define ENEMY_SHOOTER             3   // enemies_plus_mask frames 12-15(N,E,S,W)
 
 #define PICKUP_BLACK_CARD         0     // opens level door
 #define PICKUP_WHITE_CARD         1     // opens normal door
@@ -81,41 +78,15 @@ struct Element
 Element elements[9];
 bool enemyBulletActive = false;
 
-// create a byte for the the object frame
-byte objectFrame = 0;
-
-
-///////////////// DRAW ENEMIES //////////////
-/////////////////////////////////////////////
-// We have 4 different enemy types and 2 enemies we can draw
-void drawEnemies(bool enemyOneOrTwo)
+void drawEnemies(bool i)
 {
-  switch (elements[enemyOneOrTwo].characteristics & 0b00000111)
-  {
-    case ENEMY_BOX:
-      sprites.drawPlusMask(elements[enemyOneOrTwo].x, elements[enemyOneOrTwo].y + currentRoomY, enemies_plus_mask, ((elements[enemyOneOrTwo].characteristics & 0b00011000) >> 3));
-      break;
-    case ENEMY_JUMPER:
-      sprites.drawPlusMask(elements[enemyOneOrTwo].x, elements[enemyOneOrTwo].y + currentRoomY, enemies_plus_mask, 4 + (elements[enemyOneOrTwo].frame));
-      break;
-    case ENEMY_MOVER:
-      sprites.drawPlusMask(elements[enemyOneOrTwo].x, elements[enemyOneOrTwo].y + currentRoomY, enemies_plus_mask, 8 + ((elements[enemyOneOrTwo].characteristics & 0b00011000) >> 3));
-      break;
-    case ENEMY_SHOOTER:
-      sprites.drawPlusMask(elements[enemyOneOrTwo].x, elements[enemyOneOrTwo].y + currentRoomY, enemies_plus_mask, 12 + ((elements[enemyOneOrTwo].characteristics & 0b00011000) >> 3));
-      break;
-  }
+  byte ch = elements[i].characteristics;
+  sprites.drawPlusMask(elements[i].x, elements[i].y + currentRoomY, enemies_plus_mask,
+                       ((ch & 0b00000111) << 2) | ((ch & 0b00011000) >> 3));
 }
 
-void drawEnemyOne()
-{
-  drawEnemies(ENEMY_ONE);
-}
-
-void drawEnemyTwo()
-{
-  drawEnemies(ENEMY_TWO);
-}
+void drawEnemyOne() { drawEnemies(ENEMY_ONE); }
+void drawEnemyTwo() { drawEnemies(ENEMY_TWO); }
 
 
 

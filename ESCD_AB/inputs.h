@@ -107,22 +107,26 @@ void checkInputs()
   }
 }
 
-//// Moving the Enemies ////
-void moveEnemies(int enemyX, int enemyY, byte directionFacing, bool enemy)
+void enemySetDir(byte enemy, byte dir)
 {
-  switch (directionFacing)
-  {
-    case NORTH: elements[enemy].y -= 1; elements[enemy].x -= 2; break;
-    case EAST:  elements[enemy].y -= 1; elements[enemy].x += 2; break;
-    case SOUTH: elements[enemy].y += 1; elements[enemy].x += 2; break;
-    case WEST:  elements[enemy].y += 1; elements[enemy].x -= 2; break;
-  }
+  elements[enemy].characteristics = (elements[enemy].characteristics & 0b11100111) | ((dir & 3) << 3);
 }
 
-void enemyTurn(bool enemy, bool leftOrRight)
+bool enemyCanMove(byte enemy, byte dir)
 {
-  byte test = (((elements[enemy].characteristics & 0b00011000) >> 3) - 1 + (leftOrRight * 2)) & 0b00000011;
-  elements[enemy].characteristics = (elements[enemy].characteristics & 0b11100111) | (test << 3);
+  return !hitBorders(elements[enemy].x, elements[enemy].y, dir, ENEMY) &&
+         !hitObjects(elements[enemy].x, elements[enemy].y, dir, ENEMY, enemy);
+}
+
+byte directionTowardPlayer(byte enemy)
+{
+  byte et = tileFromXY(elements[enemy].x, elements[enemy].y);
+  if (et >= 25) return (elements[enemy].characteristics & 0b00011000) >> 3;
+  int8_t dRow = (int8_t)(player.isOnTile / 5) - (int8_t)(et / 5);
+  int8_t dCol = (int8_t)(player.isOnTile % 5) - (int8_t)(et % 5);
+  if (abs(dRow) >= abs(dCol))
+    return (dRow < 0) ? NORTH : SOUTH;
+  return (dCol < 0) ? EAST : WEST;
 }
 
 void updateEnemies()
@@ -131,53 +135,29 @@ void updateEnemies()
 
   for (byte i = 0; i < 2; i++)
   {
-    elements[i].frame = (elements[i].frame + 1) & 3;   // cheaper than % 4
-
-    // alive flag is elementsActive, not the original PROGMEM byte
     if (!bitRead(stageRoom[currentRoom].elementsActive, 7 - i))
       continue;
 
     byte dir = (elements[i].characteristics & 0b00011000) >> 3;
     byte type = elements[i].characteristics & 0b00000111;
 
-    bool canMove = !hitBorders(elements[i].x, elements[i].y, dir, ENEMY) &&
-                   !hitObjects(elements[i].x, elements[i].y, dir, ENEMY, i);
-
-    switch (type)
+    if (enemyCanMove(i, dir))
     {
-      case ENEMY_BOX:
-        if (canMove) moveEnemies(elements[i].x, elements[i].y, dir, i);
-        else         enemyTurn(i, TURN_RIGHT);
-        break;
-
-      case ENEMY_JUMPER:
-        if (canMove)
-        {
-          moveEnemies(elements[i].x, elements[i].y, dir, i);
-          if (checkIfOnCenterTile(elements[i].x, elements[i].y))
-          {
-            byte leftDir = (dir - 1) & 3;
-            if (!hitBorders(elements[i].x, elements[i].y, leftDir, ENEMY) &&
-                !hitObjects(elements[i].x, elements[i].y, leftDir, ENEMY, i))
-            {
-              enemyTurn(i, TURN_LEFT);
-            }
-          }
-        }
-        else enemyTurn(i, TURN_RIGHT);
-        break;
-
-      case ENEMY_MOVER:
-        if (canMove) moveEnemies(elements[i].x, elements[i].y, dir, i);
-        else         enemyTurn(i, TURN_LEFT);
-        break;
-
-      case ENEMY_SHOOTER:
-        if (canMove) moveEnemies(elements[i].x, elements[i].y, dir, i);
-        else         enemyTurn(i, TURN_RIGHT);
-        if (arduboy.everyXFrames(48)) spawnEnemyShot(i);
-        break;
+      isoStep(elements[i].x, elements[i].y, dir);
+      if (checkIfOnCenterTile(elements[i].x, elements[i].y))
+      {
+        byte want = dir;
+        if (type == ENEMY_FLYER) want = (dir - 1) & 3;
+        else if (type == ENEMY_MOVER) want = directionTowardPlayer(i);
+        if (want != dir && enemyCanMove(i, want)) enemySetDir(i, want);
+      }
     }
+    else
+    {
+      enemySetDir(i, (dir + ((type == ENEMY_MOVER) ? 2 : 1)) & 3);
+    }
+
+    if (type == ENEMY_SHOOTER && arduboy.everyXFrames(48)) spawnEnemyShot(i);
   }
 }
 
