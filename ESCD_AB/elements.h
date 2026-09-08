@@ -62,20 +62,10 @@ void drawEnemies(bool i)
                        ((ch & 0b00000111) << 2) | ((ch & 0b00011000) >> 3));
 }
 
-void drawEnemyOne() { drawEnemies(ENEMY_ONE); }
-void drawEnemyTwo() { drawEnemies(ENEMY_TWO); }
-
 void drawObject()
 {
   if (arduboy.everyXFrames(8)) elements[OBJECT].frame = (++elements[OBJECT].frame) % 6;
-  byte type = elements[OBJECT].characteristics & 0b00000111;
-  byte fr = elements[OBJECT].frame;
-  if (type >= SWITCH_OFF)
-    sprites.drawPlusMask(elements[OBJECT].x + 4, elements[OBJECT].y + currentRoomY + 6,
-                         switch_plus_mask, ((type - SWITCH_OFF) << 1) | (fr >= 3));
-  else
-    sprites.drawPlusMask(elements[OBJECT].x + 4, elements[OBJECT].y + currentRoomY + 6,
-                         elements_plus_mask, fr + (6 * type));
+  sprites.drawPlusMask(elements[OBJECT].x + 4, elements[OBJECT].y + currentRoomY + 6, elements_plus_mask, elements[OBJECT].frame + (6 * ((elements[OBJECT].characteristics & 0b00000111))));
 }
 
 void drawFloor(byte floor)
@@ -83,12 +73,6 @@ void drawFloor(byte floor)
   if (elements[floor].characteristics > 0b00000000)
   sprites.drawPlusMask(elements[floor].x - 3, elements[floor].y + currentRoomY + 9, floorTile_plus_mask, (elements[floor].characteristics & 0b00000111));
 }
-
-void drawFloorOne()   { drawFloor(FLOOR_ONE);   }
-void drawFloorTwo()   { drawFloor(FLOOR_TWO);   }
-void drawFloorThree() { drawFloor(FLOOR_THREE); }
-void drawFloorFour()  { drawFloor(FLOOR_FOUR);  }
-void drawFloorFive()  { drawFloor(FLOOR_FIVE);  }
 
 void drawBulletEnemy()
 {

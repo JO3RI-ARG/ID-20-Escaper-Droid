@@ -14,7 +14,7 @@
 #define ELEMENTS_DATA_START_AT_BYTE               ROOMS_DATA_START_AT_BYTE + 5            
 #define BYTES_USED_FOR_EVERY_ROOM                 13
 
-#define AMOUNT_OF_LEVELS                          3
+#define AMOUNT_OF_LEVELS                          4
 
 // ROOM ORDER OF TILES
 //                 /\
@@ -145,32 +145,23 @@
 //
 //
 //
-// data about the elements that get influenced: in what room, coming from what switch in which room
-// ELEMENTS     OBJECT       WHAT
-//  IN ROOM    AT  ROOM    ELEMENTS
-//0b00000011, 0b00000000, 0b00011111,
-//  ||||||||    ||||||||    ||||||||
-//  ||||||||    ||||||||    |||||||└->0 FLOOR  5 INFLUENCED (0 = false / 1 = true)
-//  ||||||||    ||||||||    ||||||└-->1 FLOOR  4 INFLUENCED (0 = false / 1 = true)
-//  ||||||||    ||||||||    |||||└--->2 FLOOR  3 INFLUENCED (0 = false / 1 = true)
-//  ||||||||    ||||||||    ||||└---->3 FLOOR  2 INFLUENCED (0 = false / 1 = true)
-//  ||||||||    ||||||||    |||└----->4 FLOOR  1 INFLUENCED (0 = false / 1 = true)
-//  ||||||||    ||||||||    ||└------>5 OBJECT 3 INFLUENCED (0 = false / 1 = true)
-//  ||||||||    ||||||||    |└------->6 ENEMY  2 INFLUENCED (0 = false / 1 = true)
-//  ||||||||    ||||||||    └-------->7 ENEMY  1 INFLUENCED (0 = false / 1 = true)
+// influence record is 2 bytes (old unused middle "from room" byte removed)
+// ELEMENTS      WHAT
+//  IN ROOM    ELEMENTS
+//0b00000011, 0b00011111,
 //  ||||||||    ||||||||
-//  ||||||||    |||||||└->0  \
-//  ||||||||    ||||||└-->&   |
-//  ||||||||    |||||└--->2   | these 6 bits are used for the roomnumber where the elements are influenced
-//  ||||||||    ||||└---->3   |
-//  ||||||||    |||└----->4   |
-//  ||||||||    ||└------>5  /
-//  ||||||||    |└------->6 NOT USED
-//  ||||||||    └-------->7 NOT USED
+//  ||||||||    |||||||└->0 FLOOR  5 INFLUENCED (0 = false / 1 = true)
+//  ||||||||    ||||||└-->1 FLOOR  4 INFLUENCED (0 = false / 1 = true)
+//  ||||||||    |||||└--->2 FLOOR  3 INFLUENCED (0 = false / 1 = true)
+//  ||||||||    ||||└---->3 FLOOR  2 INFLUENCED (0 = false / 1 = true)
+//  ||||||||    |||└----->4 FLOOR  1 INFLUENCED (0 = false / 1 = true)
+//  ||||||||    ||└------>5 OBJECT 3 INFLUENCED (0 = false / 1 = true)
+//  ||||||||    |└------->6 ENEMY  2 INFLUENCED (0 = false / 1 = true)
+//  ||||||||    └-------->7 ENEMY  1 INFLUENCED (0 = false / 1 = true)
 //  ||||||||
 //  |||||||└->0  \
 //  ||||||└-->1   |
-//  |||||└--->2   | these 6 bits are used for the roomnumber where the elements are influenced
+//  |||||└--->2   | these 6 bits are the room whose elements get toggled
 //  ||||└---->3   |
 //  |||└----->4   |
 //  ||└------>5  /
@@ -182,79 +173,83 @@
 
 const unsigned char PROGMEM level01[] =
 {
-  8,          // amount of rooms
-  2,          // amount of transporters
-  2,          // amount of rooms with influenceable objects
-
-  // NEXT LEVEL DOOR
-  0b0000000,  // data about the door and room that gets you to the next level
-
-  // NEXT LEVEL ROOM
-  0b0000010,  // data about which room gets you to the next level
-
-  // ALL THE DATA FOR EACH ROOM AND EACH ROOM HAS 13 BYTES
-  // DOORS         NORTH       EAST       SOUTH       WEST         ENEMY1      ENEMY2        OBJECT3       FLOOR1      FLOOR2      FLOOR3      FLOOR4      FLOOR5
-  0b00100000,   0b00000000, 0b00000111, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b00000000,   0b00000011, 0b00100011, 0b11000011, 0b10100011, 0b00000000, // room00
-  0b11010001,   0b00001010, 0b00000000, 0b00001100, 0b00000001,   0b00001000, 0b00000000,   0b00000000,   0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room01
-  0b01000000,   0b00000000, 0b00000000, 0b00000100, 0b00000000,   0b00000000, 0b00000000,   0b00000000,   0b01011011, 0b01101011, 0b00000000, 0b00000000, 0b00000000, // room02
-  0b00110000,   0b00000110, 0b00010011, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b00000000,   0b00110011, 0b01000011, 0b10000011, 0b10010011, 0b00000000, // room03
-
-  0b11000000,   0b00000000, 0b00000000, 0b00010100, 0b00001101,   0b00000001, 0b00000000,   0b00000000,   0b00110100, 0b01000100, 0b10000100, 0b10010100, 0b00000000, // room04
-  0b01010000,   0b00010010, 0b00000000, 0b00011000, 0b00000000,   0b00000000, 0b00000000,   0b00000000,   0b00001011, 0b00011011, 0b01100100, 0b10101011, 0b10111011, // room05
-  0b10010000,   0b00010110, 0b00000000, 0b00000000, 0b00011101,   0b00110000, 0b00000000,   0b00000000,   0b10101011, 0b10011011, 0b00011011, 0b00101011, 0b00000000, // room06
-  0b00100000,   0b00000000, 0b00011011, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b01110000,   0b00110100, 0b01000100, 0b10000100, 0b10010100, 0b01101011, // room07
-
-  // transporters data, the order of the data is by ascending numbers (ROOM X, ROOM Y, ROOM Z , ...)
-  // GOTO ROOM
-  //0b00000001,
-  //0b00000100,
-
-  // data about the elements that get influenced
-  // ELEMENTS    OBJECT       WHAT
-  // IN ROOM    AT  ROOM    ELEMENTS
-  //0b00000011,  0b00000011, 0b00011111,
-  //0b00000010,  0b00000100, 0b00000111,
+  8, 0, 0,
+  (6 << 2) | 2,   // black-card door: room 6 SOUTH
+  7,              // exit tile in vault room 7
+  // DOORS          N dest      E dest      S dest      W dest       EN1        EN2         OBJ          F1         F2         F3         F4         F5
+  96, 0, 11, 4, 0, 0, 0, 129, 33, 65, 161, 0, 0,  // r0
+  80, 2, 0, 12, 0, 121, 0, 171, 59, 139, 0, 0, 0,  // r1
+  192, 0, 0, 16, 1, 80, 0, 160, 51, 91, 131, 0, 0,  // r2
+  48, 6, 23, 0, 0, 114, 0, 33, 66, 98, 146, 0, 0,  // r3
+  144, 10, 0, 0, 25, 0, 0, 100, 60, 92, 108, 140, 0,  // r4
+  128, 0, 0, 0, 13, 163, 0, 18, 66, 130, 0, 0, 0,  // r5
+  100, 0, 19, 28, 0, 41, 0, 171, 73, 153, 0, 0, 0,  // r6  SOUTH locked (black card)
+  16, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // r7 vault, only NORTH
 };
 
 const unsigned char PROGMEM level02[] =
 {
-  8,          // amount of rooms
-  2,          // amount of transporters
-  1,          // amount of rooms with influenceable objects 
-  0b0000000,  // data about the door and room that gets you to the next level
-  0b0000100,  // data about which room gets you to the next level
-
-  // DOORS         NORTH       EAST       SOUTH       WEST         ENEMY1      ENEMY2        OBJECT3       FLOOR1      FLOOR2      FLOOR3      FLOOR4      FLOOR5
-  0b00110000,   0b00000110, 0b00011111, 0b00000000, 0b00000000,   0b00000000, 0b00000000,   0b00000000,   0b00100001, 0b10100001, 0b00000001, 0b11000001, 0b00000000, // room0
-  0b01010000,   0b00001010, 0b00000000, 0b00000000, 0b00000000,   0b00101010, 0b11000000,   0b00000000,   0b01100011, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room1
-  0b01100000,   0b00000000, 0b00001111, 0b00000100, 0b00000000,   0b00000000, 0b00000000,   0b00010101,   0b00110100, 0b01000100, 0b00001001, 0b00011001, 0b11000011, // room2
-  0b10100000,   0b00000010, 0b00010011, 0b00000000, 0b00001001,   0b00000000, 0b00000000,   0b01100110,   0b00001100, 0b00110100, 0b01011100, 0b10000100, 0b10101100, // room3
-
-  0b11000000,   0b00000000, 0b00000000, 0b00010100, 0b00001101,   0b00000000, 0b00000000,   0b00000000,   0b01111100, 0b10000100, 0b10001100, 0b10010100, 0b10011100, // room4  
-  0b01010000,   0b00010010, 0b00000000, 0b00011000, 0b00000000,   0b01111001, 0b11000001,   0b00000000,   0b01100011, 0b01011100, 0b01101100, 0b00000000, 0b00000000, // room5
-  0b10010000,   0b00010110, 0b00000000, 0b00000000, 0b00011101,   0b00110000, 0b00000000,   0b00000000,   0b01001010, 0b01101010, 0b11000010, 0b10000010, 0b00001010, // room6
-  0b10100000,   0b00000000, 0b00011011, 0b00000000, 0b00000001,   0b00000000, 0b00000000,   0b00000000,   0b00110001, 0b01000001, 0b10000001, 0b10010001, 0b01100011, // room7
-
-  // transporters data, the order of the data is by ascending numbers (ROOM X, ROOM Y, ROOM Z , ...)
-  // GOTO ROOM
-  0b00000101,
-  0b00000100,
-
-  // data about the elements that get influenced
-  // ELEMENTS   OBJECT       WHAT
-  // IN ROOM    AT  ROOM   ELEMENTS
-  0b00000011,  0b00000011, 0b00011111,
+  8, 2, 1,
+  (6 << 2) | 1,   // black-card door: room 6 EAST
+  7,
+  64, 0, 0, 4, 0, 0, 0, 161, 65, 129, 33, 0, 0,  // r0
+  176, 2, 11, 0, 17, 122, 0, 102, 59, 139, 0, 0, 0,  // r1 switch
+  128, 0, 0, 0, 5, 81, 0, 101, 50, 146, 0, 0, 0,  // r2 teleport
+  80, 18, 0, 24, 0, 0, 0, 35, 68, 100, 132, 164, 0,  // r3 pits
+  96, 0, 7, 12, 0, 169, 41, 16, 91, 107, 0, 0, 0,  // r4 black card
+  0, 0, 0, 0, 0, 115, 0, 101, 74, 154, 0, 0, 0,  // r5 teleport only
+  50, 14, 31, 0, 0, 64, 0, 162, 33, 193, 0, 0, 0,  // r6 EAST locked
+  128, 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0,  // r7 vault, only WEST
+  5,
+  2,
+  3, 0b00011110,
 };
 
-// level03 used to be a copy of level01. The pointer table reuses level01
-// until you add a distinct map. The room-data format above is unchanged.
+const unsigned char PROGMEM level03[] =
+{
+  10, 2, 1,
+  (8 << 2) | 2,   // black-card door: room 8 SOUTH
+  9,
+  96, 0, 7, 8, 0, 0, 0, 129, 25, 73, 0, 0, 0,  // r0
+  192, 0, 0, 12, 1, 98, 0, 163, 58, 138, 0, 0, 0,  // r1
+  48, 2, 15, 0, 0, 121, 0, 102, 51, 147, 0, 0, 0,  // r2 switch
+  240, 6, 23, 16, 9, 83, 176, 18, 67, 131, 0, 0, 0,  // r3 hub
+  16, 14, 0, 0, 0, 0, 0, 165, 60, 92, 108, 140, 0,  // r4 pits + teleport
+  192, 0, 0, 24, 13, 41, 169, 96, 66, 130, 91, 0, 0,  // r5 black card
+  48, 22, 35, 0, 0, 114, 0, 101, 33, 164, 0, 0, 0,  // r6 teleport
+  64, 0, 0, 32, 0, 0, 0, 99, 49, 145, 0, 0, 0,  // r7
+  212, 30, 0, 36, 25, 123, 0, 33, 74, 154, 0, 0, 0,  // r8 SOUTH locked
+  16, 34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // r9 vault, only NORTH
+  6,
+  4,
+  4, 0b00011110,
+};
+
+const unsigned char PROGMEM level04[] =
+{
+  12, 2, 1,
+  (10 << 2) | 2,  // black-card door: room 10 SOUTH
+  11,
+  96, 0, 11, 4, 0, 0, 0, 129, 33, 161, 0, 0, 0,  // r0
+  48, 2, 15, 0, 0, 0, 0, 171, 49, 65, 89, 105, 129,  // r1 boxes
+  192, 0, 0, 16, 1, 81, 0, 102, 59, 139, 0, 0, 0,  // r2 switch
+  192, 0, 0, 24, 5, 123, 43, 19, 66, 98, 130, 0, 0,  // r3 shooters
+  48, 10, 23, 0, 0, 114, 0, 101, 36, 164, 0, 0, 0,  // r4 teleport
+  128, 0, 0, 0, 17, 169, 0, 96, 60, 92, 108, 140, 0,  // r5 black card + pits
+  48, 14, 31, 0, 0, 80, 0, 161, 65, 129, 0, 0, 0,  // r6
+  192, 0, 0, 32, 25, 121, 0, 101, 50, 146, 0, 0, 0,  // r7 teleport
+  48, 30, 43, 0, 0, 114, 34, 20, 75, 155, 0, 0, 0,  // r8
+  64, 0, 0, 40, 0, 0, 0, 99, 65, 129, 0, 0, 0,  // r9
+  212, 38, 0, 44, 33, 163, 0, 33, 90, 106, 0, 0, 0,  // r10 SOUTH locked
+  16, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // r11 vault, only NORTH
+  7,
+  4,
+  5, 0b00011110,
+};
 
 const unsigned char *levels[] =
 {
-  // level 3 currently reuses level 1 data (placeholder).
-  // add a real level03[] array here when you author a new map.
-  level01, level02, level01,
+  level01, level02, level03, level04,
 };
-
 
 #endif

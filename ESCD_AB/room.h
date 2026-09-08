@@ -5,6 +5,7 @@
 #include "levels.h"
 #include "player.h"
 #include "elements.h"
+#include "font.h"
 
 #define UPPERBIT_OFFSET               4
 #define LEVEL_OFFSET                  1
@@ -88,13 +89,12 @@ struct Room {
       roomToTransportTo = 0b00000000;
       //                    |||||||└->  \
       //                    ||||||└-->   |
-      //                    |||||└--->   | these 6 bits are the room number a teleport goes to
+      //                    |||||└--->   | these 6 bits are used for the roomnumber you'll go to
       //                    ||||└---->   |
       //                    |||└----->   |
       //                    ||└------>  /
       //                    |└-------> NOT USED
-      //                    └--------> SWITCH IS ON (persists when you leave the room)
-      //                               a room is either a teleport OR a switch, never both
+      //                    └--------> NOT USED
 
       roomNumberInfluencing = 0b00000000;
       //                        |||||||└->0  \
@@ -107,14 +107,8 @@ struct Room {
       //                        └-------->7 NOT USED
 
       roomNumberFromInfluencer = 0b00000000;
-      //                           |||||||└->0  \
-      //                           ||||||└-->1   |
-      //                           |||||└--->2   | these 6 bits are used for the roomnumber where the elements are influenced
-      //                           ||||└---->3   |
-      //                           |||└----->4   |
-      //                           ||└------>5  /
-      //                           |└------->6 NOT USED
-      //                           └-------->7 NOT USED
+      //                           bits 0-6 unused (the old "from room" level byte is gone)
+      //                           bit 7 = switch is ON (remembered when you leave the room)
 
       elementsInfluenced = 0b00000000;
       //                     ||||||||
@@ -170,13 +164,13 @@ void buildRooms(byte currentLevel)
     // Fourth thing to do is to set in which room an element is influenced, where the influencer is and what elementes are influenced
     if ((pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + OBJECT + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]) & 0b00000111) > TELEPORT)
     {
+      // influence record is 2 bytes: target room, element mask
+      // (the old middle "from room" byte was unused and has been removed)
       stageRoom[roomNumber].roomNumberInfluencing = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][influenceDataAtByte + influenceDataCounter]);
-      // influence record is still 3 bytes in the level data; the middle "from room"
-      // byte is unused by the engine and is skipped to save RAM
-      stageRoom[roomNumber].elementsInfluenced = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][influenceDataAtByte + influenceDataCounter + 2]);
-      influenceDataCounter += 3;
+      stageRoom[roomNumber].elementsInfluenced = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][influenceDataAtByte + influenceDataCounter + 1]);
+      influenceDataCounter += 2;
       if ((pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + OBJECT + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]) & 0b00000111) == SWITCH_ON)
-        bitSet(stageRoom[roomNumber].roomToTransportTo, 7);
+        bitSet(stageRoom[roomNumber].roomNumberFromInfluencer, 7);
     }
   }
 }
@@ -218,10 +212,10 @@ int translateTileToY (byte currentTile)
 
 bool checkIfOnCenterTile (byte coX, byte coY)
 {
-  // tile centers: x = 3 + 12*(4 + row - col), y = 18 + 6*(row + col)
+  // same 5×5 centres as the loop above, closed form
   byte dx = coX - 3;
   byte dy = coY - 18;
-  if (dx > 96 || dy > 48 || (dx % 12) || (dy % 6)) return false;
+  if ((dx % 12) || (dy % 6)) return false;
   int8_t a = dx / 12;
   int8_t b = dy / 6;
   int8_t row = a + b - 4;
@@ -230,6 +224,35 @@ bool checkIfOnCenterTile (byte coX, byte coY)
   int8_t col = b - row;
   return (row >= 0 && row < 5 && col >= 0 && col < 5);
 }
+
+
+/*
+bool checkIfOnCenterTile(byte coX, byte coY)
+{
+  byte tx = 51;   // starting X for y=0, x=0
+  byte ty = 18;   // starting Y
+
+  for (byte y = 0; y < 5; y++)
+  {
+    byte cx = tx;
+    byte cy = ty;
+
+    for (byte x = 0; x < 5; x++)
+    {
+      if (coX == cx && coY == cy)
+        return true;
+
+      cx -= 12;
+      cy += 6;
+    }
+
+    tx += 12;
+    ty += 6;
+  }
+
+  return false;
+}
+*/
 
 void enterRoom(byte roomNumber, byte currentLevel)
 {
@@ -249,7 +272,7 @@ void enterRoom(byte roomNumber, byte currentLevel)
   }
   if ((elements[OBJECT].characteristics & 0b00000111) >= SWITCH_OFF)
   {
-    if (bitRead(stageRoom[roomNumber].roomToTransportTo, 7))
+    if (bitRead(stageRoom[roomNumber].roomNumberFromInfluencer, 7))
       bitSet(elements[OBJECT].characteristics, 0);
     else
       bitClear(elements[OBJECT].characteristics, 0);
@@ -258,7 +281,7 @@ void enterRoom(byte roomNumber, byte currentLevel)
 
 byte transportToRoom (byte roomNumber)
 {
-  return stageRoom[roomNumber].roomToTransportTo & 0b00111111;
+  return stageRoom[roomNumber].roomToTransportTo;
 }
 
 
@@ -411,151 +434,50 @@ void drawWalls()
 
 
 
-///////////////// DRAW DOOR NORTH  ////////////////
-///////////////////////////////////////////////////
-void drawDoorLintelNorth()
-{
-  sprites.drawPlusMask(16, currentRoomY + 5, doorLintel_plus_mask, NORTH);
-}
-
-void drawDoorPostBigNorth()
-{
-  sprites.drawPlusMask(24, currentRoomY + 21, doorPostBig_plus_mask, NORTH);
-}
-
-void drawDoorPostSmallNorth()
-{
-  sprites.drawPlusMask(16, currentRoomY + 21, doorPostSmall_plus_mask, NORTH);
-}
-
-void drawDoorClossedNorth()
-{
-  sprites.drawPlusMask(24, currentRoomY + 15, doorClossed_plus_mask, NORTH);
-  if (checkIfLevelDoor() == NORTH) sprites.drawPlusMask(24, currentRoomY + 16, doorClossed_plus_mask, NORTH);  // draw the clossed door 2 times for level door
-
-}
-
-
-
-/////////////////  DRAW DOOR EAST  ////////////////
-///////////////////////////////////////////////////
-void drawDoorLintelEast()
-{
-  sprites.drawPlusMask(80, currentRoomY + 5, doorLintel_plus_mask, EAST);
-}
-
-void drawDoorPostBigEast()
-{
-  sprites.drawPlusMask(80, currentRoomY + 21, doorPostBig_plus_mask, EAST);
-}
-
-void drawDoorPostSmallEast()
-{
-  sprites.drawPlusMask(95, currentRoomY + 21, doorPostSmall_plus_mask, EAST);
-}
-
-void drawDoorClossedEast()
-{
-  sprites.drawPlusMask(85, currentRoomY + 15, doorClossed_plus_mask, EAST);
-if (checkIfLevelDoor() == EAST) sprites.drawPlusMask(85, currentRoomY + 16, doorClossed_plus_mask, EAST);  // draw the clossed door 2 times for level door
-
-}
-
-
-
-/////////////////  DRAW DOOR SOUTH  ///////////////
-///////////////////////////////////////////////////
-void drawDoorLintelSouth()
-{
-  sprites.drawPlusMask(81, currentRoomY + 38, doorLintel_plus_mask, SOUTH);
-}
-
-void drawDoorPostBigSouth()
-{
-  sprites.drawPlusMask(89, currentRoomY + 54, doorPostBig_plus_mask, SOUTH);
-}
-
-void drawDoorPostSmallSouth()
-{
-  sprites.drawPlusMask(81, currentRoomY + 54, doorPostSmall_plus_mask, SOUTH);
-}
-
-void drawDoorClossedSouth()
-{
-  sprites.drawPlusMask(89 , currentRoomY + 48, doorClossed_plus_mask, SOUTH);
-  if (checkIfLevelDoor() == SOUTH) sprites.drawPlusMask(89 , currentRoomY + 49, doorClossed_plus_mask, SOUTH);  // draw the clossed door 2 times for level door
-}
-
-
-
-/////////////////   DRAW DOOR WEST  ///////////////
-///////////////////////////////////////////////////
-void drawDoorLintelWest()
-{
-  sprites.drawPlusMask(14, currentRoomY + 38, doorLintel_plus_mask, WEST);
-}
-
-void drawDoorPostBigWest()
-{
-  sprites.drawPlusMask(14, currentRoomY + 54, doorPostBig_plus_mask, WEST);
-}
-
-void drawDoorPostSmallWest()
-{
-  sprites.drawPlusMask(29, currentRoomY + 54, doorPostSmall_plus_mask, WEST);
-}
-
-void drawDoorClossedWest()
-{
-  sprites.drawPlusMask(19, currentRoomY + 48, doorClossed_plus_mask, WEST);
-  if (checkIfLevelDoor() == WEST) sprites.drawPlusMask(19, currentRoomY + 49, doorClossed_plus_mask, WEST); // draw the clossed door 2 times for level door
-}
-
-
-
-
-
-
-
-typedef void (*FunctionPointer) ();
-const FunctionPointer PROGMEM  updateElementsInRoom[] =
-{
-  drawEnemyOne,                     // 0
-  drawEnemyTwo,                     // 1
-  drawObject,                       // 2
-  drawFloorOne,                     // 3
-  drawFloorTwo,                     // 4
-  drawFloorThree,                   // 5
-  drawFloorFour,                    // 6
-  drawFloorFive,                    // 7
-  drawBulletEnemy,                  // 8
-
-  drawPlayer,                       // 9
-  drawBulletPlayer,                 // 10
-
-  drawDoorLintelNorth,              // 11
-  drawDoorPostBigNorth,             // 12
-  drawDoorPostSmallNorth,           // 13
-  drawDoorClossedNorth,             // 14
-
-  drawDoorLintelEast,               // 15
-  drawDoorPostBigEast,              // 16
-  drawDoorPostSmallEast,            // 17
-  drawDoorClossedEast,              // 18
-
-  drawDoorLintelSouth,              // 19
-  drawDoorPostBigSouth,             // 20
-  drawDoorPostSmallSouth,           // 21
-  drawDoorClossedSouth,             // 22
-
-  drawDoorLintelWest,               // 23
-  drawDoorPostBigWest,              // 24
-  drawDoorPostSmallWest,            // 25
-  drawDoorClossedWest,              // 26
-
-  drawNothing,                      // 27
+// Door piece coords: for each dir N,E,S,W × part lintel, big-post, small-post, closed
+// pairs are (x, y relative to currentRoomY). Same pixels as the original 16 functions.
+PROGMEM const unsigned char doorPieceXY[] = {
+  16,  5,  24, 21,  16, 21,  24, 15,   // NORTH
+  80,  5,  80, 21,  95, 21,  85, 15,   // EAST
+  81, 38,  89, 54,  81, 54,  89, 48,   // SOUTH
+  14, 38,  14, 54,  29, 54,  19, 48    // WEST
 };
 
+void drawDoorPiece(byte id)
+{
+  byte piece = id - NORTH_LINTEL;          // 0..15
+  byte dir   = piece >> 2;                 // N E S W
+  byte part  = piece & 3;                  // 0 lintel 1 big 2 small 3 closed
+  byte idx   = piece << 1;
+  byte x     = pgm_read_byte(&doorPieceXY[idx]);
+  int  y     = currentRoomY + pgm_read_byte(&doorPieceXY[idx + 1]);
+  const unsigned char *bmp = doorLintel_plus_mask;
+  if (part == 1) bmp = doorPostBig_plus_mask;
+  else if (part == 2) bmp = doorPostSmall_plus_mask;
+  else if (part == 3) bmp = doorClossed_plus_mask;
+  sprites.drawPlusMask(x, y, bmp, dir);
+  if (part == 3 && checkIfLevelDoor() == dir)
+    sprites.drawPlusMask(x, y + 1, bmp, dir);   // level door drawn twice
+}
+
+
+
+
+
+
+
+// itemsOrder is the z-buffer. Do NOT shrink it or move the door-gap slots.
+// painter order (back → front):
+//   [ 0] N lintel  [ 1] N big post  [ 2] GAP (droid N in / S out)
+//   [ 3] N small   [ 4] N closed
+//   [ 5] E lintel  [ 6] E big post  [ 7] GAP (droid E in / W out)
+//   [ 8] E small   [ 9] E closed
+//   [10..34] 25 floor tiles (ITEMS_ORDER_TILES_START = 10)
+//   [35] S lintel  [36] S big post  [37] GAP (droid S in / N or E out)
+//   [38] S small   [39] S closed
+//   [40] W lintel  [41] W big post  [42] GAP (droid W in)
+//   [43] W small   [44] W closed
+// Putting the droid in those GAP slots is what draws him BETWEEN the two posts.
 
 void drawRoom()
 {
@@ -563,11 +485,14 @@ void drawRoom()
   drawFloor();
   for (byte i = 0; i < SIZE_OF_ITEMSORDER; i++)
   {
-    ((FunctionPointer) pgm_read_word (&updateElementsInRoom[itemsOrder[i]]))();
+    byte id = itemsOrder[i];
+    if (id == EMPTY_PLACE) continue;
+    if (id <= ENEMY_TWO)         drawEnemies(id);
+    else if (id == OBJECT)       drawObject();
+    else if (id <= FLOOR_FIVE)   drawFloor(id);
+    else if (id == PLAYER_DROID) drawPlayer();
+    else if (id >= NORTH_LINTEL && id <= WEST_DOOR_CLOSSED) drawDoorPiece(id);
   }
-  if (!bitRead(player.characteristics, DROID_GOES_THROUGH_DOOR_AT_BIT_5) &&
-      !bitRead(player.characteristics, DROID_COMES_OUT_DOOR_AT_BIT_6))
-    drawPlayer();
   drawBulletPlayer();
   drawBulletEnemy();
 }
@@ -656,42 +581,28 @@ void checkOrderOfObjects(byte roomNumber, byte currentLevel)
   }
 }
 
-void drawNumbers(byte x, byte y, unsigned long numbers, byte fontType)
+void drawNumbers(byte x, byte y, unsigned long numbers, byte width)
 {
-  char buf[10];
+  // HUD digits use the same 3-column ticker font as the scrolling text
+  char buf[8];
   ltoa(numbers, buf, 10);
-  //itoa(arduboy.cpuLoad(), buf, 10);
-  char charLen = strlen(buf);
-  char pad = (7 - (5 * fontType)) - charLen;
-
-  if (fontType == BIG_FONT) for (byte i = 0; i < pad; i++) sprites.drawSelfMasked(43 + (6 * i), 54, numbersBig, 0);
-  else if (pad > 0) sprites.drawSelfMasked(121, 0, numbersThin, 0);
-
-
-  //draw remaining digits
+  byte charLen = strlen(buf);
+  while (charLen < width && charLen < 7)
+  {
+    memmove(buf + 1, buf, charLen + 1);
+    buf[0] = '0';
+    charLen++;
+  }
   for (byte i = 0; i < charLen; i++)
   {
-    char digit = buf[i];
-    if (digit <= 48)
+    byte digit = buf[i] - '0';
+    if (digit > 9) digit = 0;
+    uint16_t fo = (uint16_t)digit * 3;
+    for (byte c = 0; c < 3; c++)
     {
-      digit = 0;
+      byte col = pgm_read_byte(&font[fo + c]);
+      sprites.drawSelfMasked(x + (4 * i) + c, y, letterPartsNew, col);
     }
-    else {
-      digit -= 48;
-      if (digit > 9) digit = 0;
-    }
-    switch (fontType)
-    {
-      case BIG_FONT:
-        sprites.drawSelfMasked(x + (pad * 6) + (6 * i), 54, numbersBig, digit);
-        break;
-      case THIN_FONT:
-        sprites.drawSelfMasked(x + (pad * 4) + (4 * i), y, numbersThin, digit);
-        break;
-      case SMALL_FONT:
-        sprites.drawSelfMasked(x + (4 * i), y, numbersSmall, digit);
-    }
-
   }
 }
 
@@ -701,25 +612,24 @@ void drawHUD()
   for (byte y = 0; y < 8; y++) sprites.drawPlusMask(118, y * 8, hudMask_plus_mask, 0);
 
   //draw room number
-  drawNumbers(121, 0, currentRoom, THIN_FONT);
+  drawNumbers(121, 0, currentRoom, 2);
 
   //draw amount of bullets
-  drawNumbers(123, 23, (player.assets & 0b00000111), SMALL_FONT);
+  drawNumbers(123, 23, (player.assets & 0b00000111), 1);
   sprites.drawSelfMasked(122, 29, hudBullet, 0);
 
   //draw amount of white cards
-  drawNumbers(123, 38, (player.assets & 0b00011000) >> 3, SMALL_FONT);
+  drawNumbers(123, 36, (player.assets & 0b00011000) >> 3, 1);
   sprites.drawSelfMasked(121, 44, hudWhiteCard, 0);
 
   //draw amount of black cards
-  //drawNumbers(123, 53, (player.assets & 0b00100000) >> 5, SMALL_FONT);
-  drawNumbers(123, 53,((bitRead(player.assets,DROID_HAS_BLACK_CARD_AT_BIT_5)) == 0) ? 0 : 1, SMALL_FONT);
+  drawNumbers(123, 51,((bitRead(player.assets,DROID_HAS_BLACK_CARD_AT_BIT_5)) == 0) ? 0 : 1, 1);
   sprites.drawSelfMasked(121, 59, hudBlackCard, 0);
 
-  //draw life
+  //draw life (battery icon + count nudged 2px up)
   if bitRead(player.characteristics,DROID_DYING_AT_BIT_4) bitSet(player.assets,DROID_BATTERY_VISIBLE_AT_BIT_6);
   else if (arduboy.everyXFrames(20) && (player.life < 2)) bitToggle(player.assets,DROID_BATTERY_VISIBLE_AT_BIT_6);
-  if (bitRead(player.assets, DROID_BATTERY_VISIBLE_AT_BIT_6)) sprites.drawSelfMasked(122, 11, hudLife, player.life);
+  if (bitRead(player.assets, DROID_BATTERY_VISIBLE_AT_BIT_6)) sprites.drawSelfMasked(122, 9, hudLife, player.life);
 }
 
 
