@@ -73,10 +73,10 @@ byte currentRoom;
 byte currentlyOnTestingTile;
 byte testingTile;
 int currentRoomY;
-byte selectorX = 0;
-byte selectorX2 = 0;
 byte amountOfTransporters;
 byte buttonSchemeOffset;
 byte exitRoomLocation = 0;
+byte setTicker;
+byte showMask = 0;
 
 #endif

@@ -52,9 +52,9 @@ Bitmap mainMenus[] = {
 
 Bitmap selector_plus_mask[] = {
   // width, height
-  3, 8,
-  0x00, 0x7F, 0x3E,
-  0x7F, 0x00, 0x7F,
+  2, 8,
+  0B00000000,0B00011111,
+  0B00000000,0B00011111,
 };
 
 

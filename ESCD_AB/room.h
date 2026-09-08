@@ -360,9 +360,9 @@ void drawFloor()
   }
 }
 
-void drawTicker()
+void drawTicker(byte setTicker)
 {
-  //if (bitRead(setTicker,0)==1)
+  if (bitRead(setTicker,0)==1)
   {
     byte y=0;
     byte x=0;
@@ -377,7 +377,7 @@ void drawTicker()
     }
    // Serial.println(setTicker);
     //if (setTicker == TEXT_SCROLL_LEFT)
-    
+    /*
     if ((arduboy.everyXFrames(8)))
     {
       //if (setTicker == TEXT_SCROLL_LEFT)
@@ -390,7 +390,7 @@ void drawTicker()
           charBox[119] = tempChar;
       }
     }
-    /*
+    */
   if ((arduboy.everyXFrames(8)))
   {
     switch (setTicker)
@@ -417,7 +417,6 @@ void drawTicker()
           break;
         }
       }
-      */
   }
 }
 
@@ -428,7 +427,7 @@ void drawWalls()
     sprites.drawSelfMasked( -2 + (10 * x), currentRoomY + 25 - (5 * x), wallParts, NORTH);
     sprites.drawSelfMasked(60 + (10 * x), currentRoomY + (5 * x), wallParts, EAST);
   }
-  drawTicker();
+  drawTicker(setTicker);
 }
 
 
@@ -612,18 +611,18 @@ void drawHUD()
   for (byte y = 0; y < 8; y++) sprites.drawPlusMask(118, y * 8, hudMask_plus_mask, 0);
 
   //draw room number
-  drawNumbers(121, 0, currentRoom, 2);
+  drawNumbers(121, 1, currentRoom, 2);
 
   //draw amount of bullets
   drawNumbers(123, 23, (player.assets & 0b00000111), 1);
   sprites.drawSelfMasked(122, 29, hudBullet, 0);
 
   //draw amount of white cards
-  drawNumbers(123, 36, (player.assets & 0b00011000) >> 3, 1);
+  drawNumbers(123, 38, (player.assets & 0b00011000) >> 3, 1);
   sprites.drawSelfMasked(121, 44, hudWhiteCard, 0);
 
   //draw amount of black cards
-  drawNumbers(123, 51,((bitRead(player.assets,DROID_HAS_BLACK_CARD_AT_BIT_5)) == 0) ? 0 : 1, 1);
+  drawNumbers(123, 53,((bitRead(player.assets,DROID_HAS_BLACK_CARD_AT_BIT_5)) == 0) ? 0 : 1, 1);
   sprites.drawSelfMasked(121, 59, hudBlackCard, 0);
 
   //draw life (battery icon + count nudged 2px up)

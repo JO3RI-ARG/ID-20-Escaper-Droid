@@ -92,9 +92,9 @@ void stateGameNextLevel()
     player.y = translateTileToY (player.isOnTile) + currentRoomY ;
     buildRooms(level);
     enterRoom(currentRoom, level);
-    loadAndFillMessage(1);
+    loadAndFillMessage(4);
     addNumber(level,6,2);
-    addNumber(scorePlayer,14,6);
+    addNumber(scorePlayer,16,6);
     gameState = STATE_GAME_PAUSE;
   }
 }
@@ -108,7 +108,7 @@ void stateGamePause()
   //drawNumbers(43, 54, scorePlayer, BIG_FONT);
   if (arduboy.justPressed(A_BUTTON | B_BUTTON))
   {
-    loadAndFillMessage(0);
+    loadAndFillMessage(7);
     gameState = STATE_GAME_PLAYING;
   }
 }

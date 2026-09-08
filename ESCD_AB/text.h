@@ -36,11 +36,16 @@ unsigned char charBox[120];
 
 PROGMEM const char textMessage[] = // each message max 30 characters including spaces
 //"MAXIMUM 30 CHARS IS TILL HERE.\0"
+//"---------------|--------------\Ø"
 //"//////////////////////////////\0"
-  "ALERT ALERT DROID ESCAPING\0"
-  "LEVEL   SCORE       \0"
-  "GAME OVER  :<  SCORE       \0"
-  "DROID ESCAPED :>  SCORE       \0";
+  "      CONF SDFX INFO PLAY\0"           //00
+  " BUTTON SCHEME    N<>S  E<>W\0"        //01
+  " MUSIC SOUND       ON   OFF\0"         //02
+  " CREATED BY STG ONEBIT JO3RI\0"        //03
+  "LEVEL    SCORE:\0"                     //04
+  "GAME OVER  :<  SCORE:\0"               //05
+  "DROID ESCAPED :>  SCORE:\0"            //06
+  "ALERT ALERT DROID ESCAPING\0";         //07
 
 void loadAndFillMessage(uint8_t indexMessage)
 {
