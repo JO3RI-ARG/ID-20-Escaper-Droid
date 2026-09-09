@@ -14,7 +14,7 @@
 #define ELEMENTS_DATA_START_AT_BYTE               ROOMS_DATA_START_AT_BYTE + 5            
 #define BYTES_USED_FOR_EVERY_ROOM                 13
 
-#define AMOUNT_OF_LEVELS                          4
+#define AMOUNT_OF_LEVELS                          5
 
 // ROOM ORDER OF TILES
 //                 /\
@@ -171,6 +171,33 @@
 //
 
 
+const unsigned char PROGMEM level00[] =
+{
+  6,          // amount of rooms
+  2,          // amount of transporters
+  1,          // amount of rooms with influenceable objects
+
+  0b00001000,  // NEXT LEVEL DOOR (room<<2 | door N=0 E=1 S=2 W=3)
+  0b00000010,  // NEXT LEVEL ROOM
+
+  // DOORS         NORTH       EAST        SOUTH       WEST         ENEMY1      ENEMY2        OBJECT3       FLOOR1      FLOOR2      FLOOR3      FLOOR4      FLOOR5
+  0b01100000, 0b00000000, 0b00000111, 0b00010000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room0
+  0b11000100, 0b00000000, 0b00000000, 0b00001000, 0b00000001, 0b00010000, 0b01011000, 0b10101000, 0b10011100, 0b10010100, 0b10001100, 0b10000100, 0b01111100, // room1
+  0b00010000, 0b00000110, 0b00000000, 0b00000000, 0b00000000, 0b11000010, 0b10100010, 0b10001010, 0b01100111, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room2
+  0b01000000, 0b00000000, 0b00000000, 0b00010100, 0b00000000, 0b00000000, 0b00000000, 0b01100101, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room3
+  0b00010000, 0b00000010, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b01100101, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room4
+  0b00010000, 0b00001110, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b01100110, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, // room5
+
+  // transporters
+  0b00000000, // T0
+  0b00000011, // T1
+
+  // influence: in-room, switch-room, mask
+  0b00000001, 0b00000101, 0b00011111, // I0
+};
+
+
+
 const unsigned char PROGMEM level01[] =
 {
   8, 0, 0,
@@ -249,7 +276,7 @@ const unsigned char PROGMEM level04[] =
 
 const unsigned char *levels[] =
 {
-  level01, level02, level03, level04,
+  level00, level01, level02, level03, level04,
 };
 
 #endif

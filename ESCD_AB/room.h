@@ -8,8 +8,7 @@
 #include "font.h"
 
 #define UPPERBIT_OFFSET               4
-#define LEVEL_OFFSET                  1
-#define ROOM_DRAWING_OFFSET           -9         
+#define LEVEL_OFFSET                  1         
 
 #define TILE_INFRONT_DOOR_NORTH       2
 #define TILE_INFRONT_DOOR_EAST        10
@@ -372,19 +371,22 @@ void drawWallSegments()
 
 void drawTicker(byte setTicker)
 {
-  if (!bitRead(setTicker, 0)) return;
-
-  byte y = 0;
-  byte x = 0;
-  for (byte w = 0; w < 59; w++)
+  if (setTicker && showTicker)
   {
-    for (byte z = 0; z < 2; z++)
+    byte y = 0;
+    byte x = 0;
+    for (byte w = 0; w < 59; w++)
     {
-      sprites.drawSelfMasked(x, currentRoomY + 38 - y + tickerScroll, letterPartsNew, charBox[x]);
-      x++;
+      for (byte z = 0; z < 2; z++)
+      {
+        sprites.drawSelfMasked(x, currentRoomY + 38 - y + tickerScroll, letterPartsNew, charBox[x]);
+        x++;
+      }
+      (w < 29) ? y++ : y--;
     }
-    (w < 29) ? y++ : y--;
   }
+
+  if (arduboy.everyXFrames(30)&& (bitRead(setTicker,5))) bitToggle(showTicker,0);
 
   if (arduboy.everyXFrames(8))
   {
@@ -429,8 +431,9 @@ void drawTicker(byte setTicker)
 
 void drawWalls()
 {
-  drawWallSegments();
   drawTicker(setTicker);
+  drawWallSegments();
+  
 }
 
 

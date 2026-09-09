@@ -57,6 +57,8 @@
 #define FALSE                        0
 #define TRUE                         1
 
+#define ROOM_DRAWING_OFFSET           -9
+
 // globals ///////////////////////////////////////////////////////////////////
 
 Arduboy2Base arduboy;
@@ -74,9 +76,10 @@ byte currentlyOnTestingTile;
 byte testingTile;
 int currentRoomY;
 byte amountOfTransporters;
-byte buttonSchemeOffset;
+byte buttonSchemeOffset = FALSE;
 byte exitRoomLocation = 0;
 byte setTicker;
+bool showTicker;
 byte showMask = 0;
 int8_t tickerScroll = 0;     // vertical ticker offset, -6 .. +6
 bool objectHiddenThisVisit;  // ammo pickup hides until you leave the room

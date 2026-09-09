@@ -139,15 +139,16 @@ void updatePlayer()
   }
   else if (bitRead(player.characteristics, DROID_DYING_AT_BIT_4))
   {
-    loadAndFillMessage(2);
+    currentRoomY = ROOM_DRAWING_OFFSET;
+    loadAndFillMessage(5);
     addNumber(scorePlayer,22,6);
+    tickerScroll = 0;
+    setTicker = TEXT_SCROLL_LEFT;
+    showTicker = TRUE;
+    player.x = 51;
+    player.y = 21;
     gameState = STATE_GAME_OVER;
   }
-}
-
-void playerDies()
-{
-
 }
 
 void playerTransporting()

@@ -43,6 +43,13 @@ void playerChecksAndOpensDoor(byte direction)
     scorePlayer += SCORE_OPEN_DOOR;
     bitClear(stageRoom[currentRoom].doorsClosedActive, direction);
   }
+  else
+  {
+    tickerScroll = 0;
+    loadAndFillMessage(8);
+    setTicker = TEXT_BLINK;
+    showTicker = TRUE;
+  }
 }
 
 void playerChecksAndOpensLevelDoor(byte direction)

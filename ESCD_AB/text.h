@@ -12,24 +12,24 @@
 #define TEXT_SCROLL_RIGHT          5       
 #define TEXT_SCROLL_UP             9       
 #define TEXT_SCROLL_DOWN           17      
-#define TEXT_BLINK                 32      
+#define TEXT_BLINK                 33      
 #define TEXT_BLINK_SCROLL_LEFT     35      
 #define TEXT_BLINK_SCROLL_RIGHT    37      
-#define TEXT_BLINK_SCROLL_UP       40      
-#define TEXT_BLINK_SCROLL_DOWN     48                                            
+#define TEXT_BLINK_SCROLL_UP       41      
+#define TEXT_BLINK_SCROLL_DOWN     51                                            
 
 //         byte setTicker = 0b00000000;
 //                            ||||||||       
 //                            ||||||||   
 //                            ||||||||
-//                            |||||||└->0 SHOW TEXT    (0 = false / 1 = true)
-//                            ||||||└-->1 SCROLL LEFT  (0 = false / 1 = true)
-//                            |||||└--->2 SCROLL RIGHT (0 = false / 1 = true)
-//                            ||||└---->3 SCROLL UP    (0 = false / 1 = true)
-//                            |||└----->4 SCROLL DOWN  (0 = false / 1 = true)
-//                            ||└------>5 BLINK        (0 = false / 1 = true)
-//                            |└------->6 NOT USED     (0 = false / 1 = true)
-//                            └-------->7 NOT USED     (0 = false / 1 = true)
+//                            |||||||└->0 1 SHOW TEXT    (0 = false / 1 = true)
+//                            ||||||└-->1 2 SCROLL LEFT  (0 = false / 1 = true)
+//                            |||||└--->2 4 SCROLL RIGHT (0 = false / 1 = true)
+//                            ||||└---->3 8 SCROLL UP    (0 = false / 1 = true)
+//                            |||└----->4 16 SCROLL DOWN  (0 = false / 1 = true)
+//                            ||└------>5 32 BLINK        (0 = false / 1 = true)
+//                            |└------->6 64 NOT USED     (0 = false / 1 = true)
+//                            └-------->7 128 USED FOR THE BLICKING EFFECT
 
 unsigned char charBox[120]; 
 //unsigned char textBox[30];
@@ -38,14 +38,16 @@ PROGMEM const char textMessage[] = // each message max 30 characters including s
 //"MAXIMUM 30 CHARS IS TILL HERE.\0"
 //"---------------|--------------\Ø"
 //"//////////////////////////////\0"
-  "      CONF SDFX INFO PLAY\0"           //00
+  "    CONF SDFX   INFO PLAY\0"           //00
   " BUTTON SCHEME    N<>S  E<>W\0"        //01
   " MUSIC SOUND       ON   OFF\0"         //02
   " CREATED BY STG ONEBIT JO3RI\0"        //03
-  "LEVEL    SCORE:\0"                     //04
+  "   LEVEL         SCORE:\0"             //04
   "GAME OVER  :<  SCORE:\0"               //05
   "DROID ESCAPED :>  SCORE:\0"            //06
-  "ALERT ALERT DROID ESCAPING\0";         //07
+  "ALERT ALERT DROID ESCAPING\0"          //07
+  "ACCESS DENIED: USE WHITE CARD\0"       //08
+  "ACCESS DENIED: USE BLACK CARD\0";      //09
 
 void loadAndFillMessage(uint8_t indexMessage)
 {

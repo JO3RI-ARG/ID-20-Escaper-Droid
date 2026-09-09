@@ -92,9 +92,10 @@ void stateGameNextLevel()
     player.y = translateTileToY (player.isOnTile) + currentRoomY ;
     buildRooms(level);
     enterRoom(currentRoom, level);
+    setTicker = TEXT_BLINK;
     loadAndFillMessage(4);
-    addNumber(level,6,2);
-    addNumber(scorePlayer,16,6);
+    addNumber(level,9,2);
+    addNumber(scorePlayer,23,6);
     gameState = STATE_GAME_PAUSE;
   }
 }
@@ -105,24 +106,35 @@ void stateGamePause()
   drawWalls();
   drawFloor();
   drawHUD();
-  //drawNumbers(43, 54, scorePlayer, BIG_FONT);
   if (arduboy.justPressed(A_BUTTON | B_BUTTON))
   {
     loadAndFillMessage(7);
+    setTicker = TEXT_SCROLL_RIGHT;
+    showTicker = TRUE;
     gameState = STATE_GAME_PLAYING;
   }
 }
 
+
 void stateGameOver()
 {
-  playerDies();
   drawWalls();
   drawFloor();
   drawPlayer();
+  if (arduboy.justPressed(A_BUTTON | B_BUTTON))
+  {
+    ATM.play(menuSong);
+    statePrepForMainMenu();
+  }
+}
+
+void stateGameFinished()
+{
+  drawWalls();
   if (arduboy.justPressed(A_BUTTON | B_BUTTON)) 
   {
-    gameState = STATE_MENU_MAIN;
     ATM.play(menuSong);
+    statePrepForMainMenu();
   }
 }
 
@@ -143,14 +155,6 @@ void stateGameTransporting()
   }
 }
 
-void stateGameFinished()
-{
-  drawWalls();
-  if (arduboy.justPressed(A_BUTTON | B_BUTTON)) 
-  {
-    gameState = STATE_MENU_MAIN;
-    ATM.play(menuSong);
-  }
-}
+
 
 #endif
