@@ -4,92 +4,75 @@
 #include "globals.h"
 #include "room.h"
 
+// main ticker: "      CONF SDFX INFO PLAY"
+// each glyph is 4 columns; words start at charBox x = 24, 44, 64, 84
+PROGMEM const byte menuWordX[] = { 24, 44, 64, 84 };
+
 void drawTitleScreen()
 {
-  /*
-  sprites.drawSelfMasked(0, 0, titleScreen, 0);
-  sprites.drawSelfMasked(17, 56, mainMenus, gameState);
-  */
+  if (currentRoomY == 0) currentRoomY = ROOM_DRAWING_OFFSET;
   drawWalls();
 }
 
-void drawMask()
+byte tickerYAt(byte x)
 {
-  if (arduboy.everyXFrames(4))
-  {
-    if (showMask==0)showMask=1;
-    else showMask=0;
-  }
-  //if (showMask) 
-  sprites.drawPlusMask(18+(menuSelection * 24), 30, selector_plus_mask, 0);
-  sprites.drawPlusMask(20+(menuSelection * 24), 30, selector_plus_mask, 0);
-  sprites.drawPlusMask(22+(menuSelection * 24), 30, selector_plus_mask, 0);
+  return (x < 58) ? (x >> 1) : (58 - (x >> 1));
 }
 
-void moveSelectors()
+void drawSelectedWordMask(byte x0)
 {
-  /*
-if (arduboy.everyXFrames(2))
+  if (arduboy.everyXFrames(16)) bitToggle(showMask, 0);
+  if (!showMask) return;
+  for (byte i = 0; i < 8; i++)
   {
-    selectorX++;
-    selectorX2--;
+    byte x = x0 + (i << 1);
+    sprites.drawPlusMask(x, currentRoomY + 38 - tickerYAt(x) + tickerScroll, selector_plus_mask, 0);
   }
-  if (selectorX > 31)selectorX = 20;
-  if (selectorX2 < 21)selectorX2 = 32;
-  */
 }
 
 void stateMenuIntro()
 {
   if (arduboy.everyXFrames(120))
-  { 
+  {
     ATM.stop();
     ATM.play(menuSong);
     buttonSchemeOffset = FALSE;
+    currentRoomY = ROOM_DRAWING_OFFSET;
+    tickerScroll = 0;
     loadAndFillMessage(0);
     setTicker = TEXT_STAND_STILL;
     gameState = STATE_MENU_MAIN;
   }
   sprites.drawSelfMasked(49, 20, T_arg, 0);
-
 }
 
 void stateMenuMain()
 {
-  // show the titleScreen art
   drawTitleScreen();
-  //moveSelectors();
-  if (arduboy.everyXFrames(16))
-  {
-    bitToggle(showMask,0);
-  }
-  if (showMask){
-  sprites.drawPlusMask(24+(menuSelection * 24), 25, selector_plus_mask, 0);
-  sprites.drawPlusMask(26+(menuSelection * 24), 23, selector_plus_mask, 0);
-  sprites.drawPlusMask(28+(menuSelection * 24), 21, selector_plus_mask, 0);
-  }
+  drawSelectedWordMask(pgm_read_byte(&menuWordX[menuSelection]));
 
   if (arduboy.justPressed(RIGHT_BUTTON) && (menuSelection < 3)) menuSelection++;
   if (arduboy.justPressed(LEFT_BUTTON) && (menuSelection > 0)) menuSelection--;
-  if (arduboy.justPressed(A_BUTTON | B_BUTTON)) 
+  if (arduboy.justPressed(A_BUTTON | B_BUTTON))
   {
-    gameState = menuSelection+1;
-    loadAndFillMessage(menuSelection+1);
+    gameState = menuSelection + 1;
+    loadAndFillMessage(menuSelection + 1);
+    tickerScroll = 0;
   }
 }
 
 void stateMenuConf()
 {
-  byte offSet = 65 + (12 * buttonSchemeOffset);
   drawTitleScreen();
-  //moveSelectors();
-  //sprites.drawPlusMask(selectorX + offSet, 56, selector_plus_mask, 0);
-  //sprites.drawPlusMask(selectorX2 + offSet, 56, selector_plus_mask, 0);
+  // " BUTTON SCHEME    N<>S  E<>W"  N<>S @ char 18 → x72, E<>W @ char 24 → x96
+  drawSelectedWordMask(buttonSchemeOffset ? 96 : 72);
   if (arduboy.justPressed(RIGHT_BUTTON)) buttonSchemeOffset = 4;
   if (arduboy.justPressed(LEFT_BUTTON)) buttonSchemeOffset = 0;
   if (arduboy.justPressed(A_BUTTON | B_BUTTON))
   {
     loadAndFillMessage(0);
+    tickerScroll = 0;
+    setTicker = TEXT_STAND_STILL;
     gameState = STATE_MENU_MAIN;
   }
 }
@@ -97,28 +80,29 @@ void stateMenuConf()
 void stateMenuInfo()
 {
   drawTitleScreen();
-  setTicker=TEXT_SCROLL_LEFT;
+  setTicker = TEXT_SCROLL_LEFT;
   if (arduboy.justPressed(A_BUTTON | B_BUTTON))
   {
     loadAndFillMessage(0);
-    setTicker=TEXT_STAND_STILL;
+    tickerScroll = 0;
+    setTicker = TEXT_STAND_STILL;
     gameState = STATE_MENU_MAIN;
   }
 }
 
 void stateMenuSdfx()
 {
-  byte offSet = 44 + (arduboy.audio.enabled() * 18);
   drawTitleScreen();
-  //moveSelectors();
-  //sprites.drawPlusMask(selectorX + offSet, 56, selector_plus_mask, 0);
-  //sprites.drawPlusMask(selectorX2 + offSet, 56, selector_plus_mask, 0);
+  // " MUSIC SOUND       ON   OFF"  ON @ char 19 → x76, OFF @ char 24 → x96
+  drawSelectedWordMask(arduboy.audio.enabled() ? 76 : 96);
   if (arduboy.justPressed(RIGHT_BUTTON)) arduboy.audio.on();
   if (arduboy.justPressed(LEFT_BUTTON)) arduboy.audio.off();
   if (arduboy.justPressed(A_BUTTON | B_BUTTON))
   {
     arduboy.audio.saveOnOff();
     loadAndFillMessage(0);
+    tickerScroll = 0;
+    setTicker = TEXT_STAND_STILL;
     gameState = STATE_MENU_MAIN;
   }
 }

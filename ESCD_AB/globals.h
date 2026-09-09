@@ -78,5 +78,7 @@ byte buttonSchemeOffset;
 byte exitRoomLocation = 0;
 byte setTicker;
 byte showMask = 0;
+int8_t tickerScroll = 0;     // vertical ticker offset, -6 .. +6
+bool objectHiddenThisVisit;  // ammo pickup hides until you leave the room
 
 #endif

@@ -64,6 +64,7 @@ void drawEnemies(bool i)
 
 void drawObject()
 {
+  if (objectHiddenThisVisit) return;
   if (arduboy.everyXFrames(8)) elements[OBJECT].frame = (++elements[OBJECT].frame) % 6;
   sprites.drawPlusMask(elements[OBJECT].x + 4, elements[OBJECT].y + currentRoomY + 6, elements_plus_mask, elements[OBJECT].frame + (6 * ((elements[OBJECT].characteristics & 0b00000111))));
 }

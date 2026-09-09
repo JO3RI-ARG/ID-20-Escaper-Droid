@@ -94,7 +94,16 @@ void checkInputs()
       }
     }
 
-    if (!usedAction) spawnPlayerShot();
+    if (!usedAction)
+    {
+      byte occ = 255;
+      if (neededTile >= 0 && neededTile < 25)
+        occ = itemsOrder[neededTile + ITEMS_ORDER_TILES_START];
+      if (occ >= FLOOR_ONE && occ <= FLOOR_FIVE && floorKind(occ) == FLOOR_BOX)
+        tryPushBox(occ, dir);
+      else
+        spawnPlayerShot();
+    }
   }
 }
 

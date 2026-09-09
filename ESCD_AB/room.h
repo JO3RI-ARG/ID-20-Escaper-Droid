@@ -258,6 +258,7 @@ void enterRoom(byte roomNumber, byte currentLevel)
 {
   playerShot.active = false;
   enemyBulletActive = false;
+  objectHiddenThisVisit = false;
   for (byte i = 0; i < 8; i++)
   {
     elements[i].characteristics = 0;
@@ -360,73 +361,75 @@ void drawFloor()
   }
 }
 
-void drawTicker(byte setTicker)
-{
-  if (bitRead(setTicker,0)==1)
-  {
-    byte y=0;
-    byte x=0;
-    for (byte  w= 0;w<59;w++ )
-    {
-      for (byte z = 0;z<2;z++)
-      {
-        sprites.drawSelfMasked(x, currentRoomY + 38 - y, letterPartsNew, charBox[x]);
-        x++;
-      }
-      (w < 29) ? y++ : y--;
-    }
-   // Serial.println(setTicker);
-    //if (setTicker == TEXT_SCROLL_LEFT)
-    /*
-    if ((arduboy.everyXFrames(8)))
-    {
-      //if (setTicker == TEXT_SCROLL_LEFT)
-      {
-        byte tempChar = charBox[0];          // save the first byte
-          for (int i = 0; i < 119; i++)
-          {
-            charBox[i] = charBox[i + 1];
-          }
-          charBox[119] = tempChar;
-      }
-    }
-    */
-  if ((arduboy.everyXFrames(8)))
-  {
-    switch (setTicker)
-      {
-        case TEXT_SCROLL_LEFT:
-          {
-            byte tempChar = charBox[0];          // save the first byte
-            for (int i = 0; i < 119; i++)
-            {
-              charBox[i] = charBox[i + 1];
-            }
-            charBox[119] = tempChar;                        // put the saved byte at the end
-          }
-          break;
-        case TEXT_SCROLL_RIGHT:
-          {
-            byte tempChar = charBox[120];          // save the first byte
-            for (int i = 119; i > 0; i--)
-            {
-              charBox[i] = charBox[i - 1];
-            }
-            charBox[0] = tempChar;                        // put the saved byte at the end
-          }
-          break;
-        }
-      }
-  }
-}
-
-void drawWalls()
+void drawWallSegments()
 {
   for (byte x = 0; x < 6; x++)
   {
     sprites.drawSelfMasked( -2 + (10 * x), currentRoomY + 25 - (5 * x), wallParts, NORTH);
     sprites.drawSelfMasked(60 + (10 * x), currentRoomY + (5 * x), wallParts, EAST);
   }
+}
+
+void drawTicker(byte setTicker)
+{
+  if (!bitRead(setTicker, 0)) return;
+
+  byte y = 0;
+  byte x = 0;
+  for (byte w = 0; w < 59; w++)
+  {
+    for (byte z = 0; z < 2; z++)
+    {
+      sprites.drawSelfMasked(x, currentRoomY + 38 - y + tickerScroll, letterPartsNew, charBox[x]);
+      x++;
+    }
+    (w < 29) ? y++ : y--;
+  }
+
+  if (arduboy.everyXFrames(8))
+  {
+    switch (setTicker)
+    {
+      case TEXT_SCROLL_LEFT:
+      case TEXT_BLINK_SCROLL_LEFT:
+        {
+          byte tempChar = charBox[0];
+          for (int i = 0; i < 119; i++) charBox[i] = charBox[i + 1];
+          charBox[119] = tempChar;
+        }
+        break;
+      case TEXT_SCROLL_RIGHT:
+      case TEXT_BLINK_SCROLL_RIGHT:
+        {
+          byte tempChar = charBox[119];
+          for (int i = 119; i > 0; i--) charBox[i] = charBox[i - 1];
+          charBox[0] = tempChar;
+        }
+        break;
+      case TEXT_SCROLL_UP:
+      case TEXT_BLINK_SCROLL_UP:
+        if (tickerScroll > -6) tickerScroll--;
+        else tickerScroll = 6;
+        break;
+      case TEXT_SCROLL_DOWN:
+      case TEXT_BLINK_SCROLL_DOWN:
+        if (tickerScroll < 6) tickerScroll++;
+        else tickerScroll = -6;
+        break;
+    }
+  }
+
+  // blink: hide the text every other 16 frames
+  if (bitRead(setTicker, 5) && showMask) { /* drawn already; mask is separate */ }
+
+  // vertical motion pokes through the isometric walls — redraw them on top
+  if (bitRead(setTicker, 3) || bitRead(setTicker, 4))
+    drawWallSegments();
+}
+
+void drawWalls()
+{
+  drawWallSegments();
   drawTicker(setTicker);
 }
 
@@ -549,7 +552,8 @@ void checkOrderOfObjects(byte roomNumber, byte currentLevel)
   // elements first, then the droid so a box on the same tile cannot hide him
   for (byte i = 0; i < 8; i++)
   {
-   if (bitRead(stageRoom[currentRoom].elementsActive, 7 - i))itemsOrder[tileFromXY(elements[i].x, elements[i].y) + ITEMS_ORDER_TILES_START] = i;
+    if (i == OBJECT && objectHiddenThisVisit) continue;
+    if (bitRead(stageRoom[currentRoom].elementsActive, 7 - i))itemsOrder[tileFromXY(elements[i].x, elements[i].y) + ITEMS_ORDER_TILES_START] = i;
   }
 
   if (!bitRead(player.characteristics, DROID_GOES_THROUGH_DOOR_AT_BIT_5) && !bitRead(player.characteristics, DROID_COMES_OUT_DOOR_AT_BIT_6))

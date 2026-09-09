@@ -200,7 +200,7 @@ void checkObjectTypeAndAct()
       if ((player.assets & 0b00000111) < 0b00000111)
       {
         player.assets++;
-        clearElement();
+        objectHiddenThisVisit = true;   // gone until you leave the room
         scorePlayer += SCORE_BULLET;
       }
       break;
@@ -225,30 +225,28 @@ boolean tryPushBox(byte slot, byte dir)
 {
   if (floorKind(slot) != FLOOR_BOX) return false;
   dir &= 3;
+  if (!checkIfOnCenterTile(elements[slot].x, elements[slot].y)) return false;
 
-  // only test the next tile when the box sits on a tile center;
-  // mid-tile, keep stepping so it can finish onto the last floor tile
-  if (checkIfOnCenterTile(elements[slot].x, elements[slot].y))
-  {
-    byte src = tileFromXY(elements[slot].x, elements[slot].y);
-    if (src >= 25) return false;
-    byte col = src % 5;
-    if ((dir == NORTH && src < 5) ||
-        (dir == SOUTH && src >= 20) ||
-        (dir == EAST  && col == 0) ||
-        (dir == WEST  && col == 4))
-      return false;
+  byte src = tileFromXY(elements[slot].x, elements[slot].y);
+  if (src >= 25) return false;
+  byte col = src % 5;
+  if ((dir == NORTH && src < 5) ||
+      (dir == SOUTH && src >= 20) ||
+      (dir == EAST  && col == 0) ||
+      (dir == WEST  && col == 4))
+    return false;
 
-    int8_t dest = (int8_t)src;
-    if (dir == NORTH) dest -= 5;
-    else if (dir == EAST) dest -= 1;
-    else if (dir == SOUTH) dest += 5;
-    else dest += 1;
-    if (dest < 0 || dest > 24) return false;
-    if (itemsOrder[dest + ITEMS_ORDER_TILES_START] != EMPTY_PLACE) return false;
-  }
+  int8_t dest = (int8_t)src;
+  if (dir == NORTH) dest -= 5;
+  else if (dir == EAST) dest -= 1;
+  else if (dir == SOUTH) dest += 5;
+  else dest += 1;
+  if (dest < 0 || dest > 24) return false;
+  if (itemsOrder[dest + ITEMS_ORDER_TILES_START] != EMPTY_PLACE) return false;
 
-  isoStep(elements[slot].x, elements[slot].y, dir);
+  // kick: snap one full tile
+  elements[slot].x = translateTileToX(dest);
+  elements[slot].y = translateTileToY(dest);
   return true;
 }
 
@@ -272,35 +270,11 @@ void decideOnCollision()
         byte kind = floorKind(currentlyOnTestingTile);
         if (kind == FLOOR_BOX)
         {
-          byte slot = currentlyOnTestingTile;
-          byte dir = player.characteristics & 0b00000011;
-          if (tryPushBox(slot, dir))
-          {
-            int ox = player.x, oy = player.y, oc = currentRoomY;
-            walkThroughDoor();
-            byte pTile = tileFromXY(player.x, player.y - currentRoomY);
-            byte bTile = tileFromXY(elements[slot].x, elements[slot].y);
-            if (pTile >= 25 || pTile == bTile)
-            {
-              player.x = ox;
-              player.y = oy;
-              currentRoomY = oc;
-              int8_t behind = (int8_t)bTile;
-              if (dir == NORTH) behind += 5;
-              else if (dir == EAST) behind += 1;
-              else if (dir == SOUTH) behind -= 5;
-              else behind -= 1;
-              if (behind >= 0 && behind <= 24)
-              {
-                player.x = translateTileToX(behind);
-                player.y = translateTileToY(behind) + currentRoomY;
-                player.isOnTile = behind;
-              }
-            }
-          }
+          // walking into a box just stops you; kick it with B
         }
-        else if (kind == FLOOR_SPIKE || kind == FLOOR_PIT)
+        else if (kind == FLOOR_SPIKE)
           playerTouchesHazard();
+        // pits no longer hurt the droid
       }
       break;
   }
