@@ -51,7 +51,10 @@ void checkInputs()
   }
 
   if (arduboy.justPressed(A_BUTTON))
+  {
+    statePrepForPause();
     gameState = STATE_GAME_PAUSE;
+  }
 
   if (arduboy.justPressed(B_BUTTON))
     {

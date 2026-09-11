@@ -9,14 +9,10 @@
 #define TEXT_NOT_SHOWN             0
 #define TEXT_STAND_STILL           1       
 #define TEXT_SCROLL_LEFT           3       
-#define TEXT_SCROLL_RIGHT          5       
-#define TEXT_SCROLL_UP             9       
-#define TEXT_SCROLL_DOWN           17      
+#define TEXT_SCROLL_RIGHT          5            
 #define TEXT_BLINK                 33      
 #define TEXT_BLINK_SCROLL_LEFT     35      
-#define TEXT_BLINK_SCROLL_RIGHT    37      
-#define TEXT_BLINK_SCROLL_UP       41      
-#define TEXT_BLINK_SCROLL_DOWN     51                                            
+#define TEXT_BLINK_SCROLL_RIGHT    37                                                 
 
 //         byte setTicker = 0b00000000;
 //                            ||||||||       
@@ -25,11 +21,13 @@
 //                            |||||||└->0 1 SHOW TEXT    (0 = false / 1 = true)
 //                            ||||||└-->1 2 SCROLL LEFT  (0 = false / 1 = true)
 //                            |||||└--->2 4 SCROLL RIGHT (0 = false / 1 = true)
-//                            ||||└---->3 8 SCROLL UP    (0 = false / 1 = true)
-//                            |||└----->4 16 SCROLL DOWN  (0 = false / 1 = true)
-//                            ||└------>5 32 BLINK        (0 = false / 1 = true)
-//                            |└------->6 64 NOT USED     (0 = false / 1 = true)
+//                            ||||└---->3 8 NOT USED     (0 = false / 1 = true)
+//                            |||└----->4 16 NOT USED    (0 = false / 1 = true)
+//                            ||└------>5 32 BLINK       (0 = false / 1 = true)
+//                            |└------->6 64 NOT USED    (0 = false / 1 = true)
 //                            └-------->7 128 USED FOR THE BLICKING EFFECT
+
+
 
 unsigned char charBox[120]; 
 //unsigned char textBox[30];
@@ -45,9 +43,20 @@ PROGMEM const char textMessage[] = // each message max 30 characters including s
   "   LEVEL         SCORE:\0"             //04
   "GAME OVER  :<  SCORE:\0"               //05
   "DROID ESCAPED :>  SCORE:\0"            //06
-  "ALERT ALERT DROID ESCAPING\0"          //07
-  "ACCESS DENIED: USE WHITE CARD\0"       //08
-  "ACCESS DENIED: USE BLACK CARD\0";      //09
+  "ACCESS DENIED: USE WHITE CARD\0"       //07
+  "ACCESS DENIED: USE BLACK CARD\0"       //08
+  "DROID USED A TELEPORT GET HIM\0"       //09
+  "WATCH IT DROID FOUND A SWITCH\0"       //10
+  "ALERT ALERT DROID ESCAPING\0"          //11
+  "GET THAT DROID NOW\0"                  //12  
+  "DO NOT LET THAT DROID ESCAPE\0"        //13
+  "IT STOLE THE DEADSTAR PLANS\0"         //14
+  "THIS IS A NO SMOKING FACILITY\0"       //15
+  "AREA 51 IS IN LOCKDOWN\0"              //16
+  "DROID Q3E3 PLEASE REPORT NOW\0"        //17
+  "THE EXIT IS THAT WAY ====>\0";         //18
+
+
 
 void loadAndFillMessage(uint8_t indexMessage)
 {
@@ -122,7 +131,5 @@ void addNumber(unsigned long number, byte charIndex, byte amountLeadingZeros)
     writePos -= 4;   // previous character
   }
 }
-
-
 
 #endif

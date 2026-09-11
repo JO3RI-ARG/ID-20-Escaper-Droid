@@ -45,8 +45,7 @@ void playerChecksAndOpensDoor(byte direction)
   }
   else
   {
-    tickerScroll = 0;
-    loadAndFillMessage(8);
+    loadAndFillMessage(7);
     setTicker = TEXT_BLINK;
     showTicker = TRUE;
   }
@@ -59,6 +58,12 @@ void playerChecksAndOpensLevelDoor(byte direction)
     player.assets -= 0b00100000;
     scorePlayer += SCORE_LEVEL_DOOR;
     bitClear(stageRoom[currentRoom].doorsClosedActive, direction);
+  }
+  else
+  {
+    loadAndFillMessage(8);
+    setTicker = TEXT_BLINK;
+    showTicker = TRUE;
   }
 }
 

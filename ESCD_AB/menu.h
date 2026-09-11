@@ -1,6 +1,8 @@
 #ifndef MENU_H
 #define MENU_H
 
+#define SET_THE_DANCERS_Y       6
+
 #include "globals.h"
 #include "room.h"
 
@@ -26,20 +28,16 @@ void drawSelectedWordMask(byte x0)
   for (byte i = 0; i < 8; i++)
   {
     byte x = x0 + (i << 1);
-    sprites.drawPlusMask(x, currentRoomY + 38 - tickerYAt(x) + tickerScroll, selector_plus_mask, 0);
+    sprites.drawPlusMask(x, currentRoomY + 38 - tickerYAt(x), selector_plus_mask, 0);
   }
 }
 
 void statePrepForMainMenu()
 {
   currentRoomY = ROOM_DRAWING_OFFSET;
-  tickerScroll = 0;
   loadAndFillMessage(0);
   setTicker = TEXT_STAND_STILL;
   showTicker = TRUE;
-  player.set();
-  player.x = 51;
-  player.y = 11;
   gameState = STATE_MENU_MAIN;
 }
 
@@ -57,9 +55,18 @@ void stateMenuMain()
 {
   drawTitleScreen();
   drawSelectedWordMask(pgm_read_byte(&menuWordX[menuSelection]));
-  //drawFloor();
-  if (arduboy.everyXFrames(26)) bitToggle(player.characteristics,0);
-  drawPlayer();
+  if (arduboy.everyXFrames(26)) danceDroid = !danceDroid;
+  sprites.drawPlusMask(51, 9+SET_THE_DANCERS_Y, droid_plus_mask, 2+danceDroid);
+
+  //sprites.drawPlusMask(39, 15+SET_THE_DANCERS_Y, enemies_plus_mask, 2+danceDroid);
+  sprites.drawPlusMask(27, 21+SET_THE_DANCERS_Y, enemies_plus_mask, 6+danceDroid);
+  //sprites.drawPlusMask(15, 27+SET_THE_DANCERS_Y, enemies_plus_mask, 10+danceDroid);
+  sprites.drawPlusMask(3, 33+SET_THE_DANCERS_Y, enemies_plus_mask, 14+danceDroid);
+
+  //sprites.drawPlusMask(63, 15+SET_THE_DANCERS_Y, enemies_plus_mask, 2+danceDroid);
+  sprites.drawPlusMask(75, 21+SET_THE_DANCERS_Y, enemies_plus_mask, 2+danceDroid);
+  //sprites.drawPlusMask(87, 27+SET_THE_DANCERS_Y, enemies_plus_mask, 10+danceDroid);
+  sprites.drawPlusMask(99, 33+SET_THE_DANCERS_Y, enemies_plus_mask, 10+danceDroid);
 
   if (arduboy.justPressed(RIGHT_BUTTON) && (menuSelection < 3)) menuSelection++;
   if (arduboy.justPressed(LEFT_BUTTON) && (menuSelection > 0)) menuSelection--;
@@ -67,7 +74,6 @@ void stateMenuMain()
   {
     gameState = menuSelection + 1;
     loadAndFillMessage(menuSelection + 1);
-    tickerScroll = 0;
   }
 }
 

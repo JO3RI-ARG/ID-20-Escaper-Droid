@@ -80,8 +80,25 @@ byte buttonSchemeOffset = FALSE;
 byte exitRoomLocation = 0;
 byte setTicker;
 bool showTicker;
+bool danceDroid = 0;
 byte showMask = 0;
-int8_t tickerScroll = 0;     // vertical ticker offset, -6 .. +6
 bool objectHiddenThisVisit;  // ammo pickup hides until you leave the room
+
+void statePrepForPause()
+{
+  setTicker = TEXT_BLINK;
+  loadAndFillMessage(4);
+  addNumber(level,9,2);
+  addNumber(scorePlayer,23,6);
+}
+
+void statePrepForRoom()
+{
+  loadAndFillMessage(11+(currentRoom%8));
+  setTicker = TEXT_SCROLL_LEFT;
+  showTicker = TRUE;
+  gameState = STATE_GAME_PLAYING;
+}
+
 
 #endif

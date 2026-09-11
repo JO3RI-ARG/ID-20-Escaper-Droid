@@ -1,6 +1,6 @@
 /*
   Escaper Droid
-  Arduboy version 0.8.4
+  Arduboy version 0.8.6
   
   STARTED by TEAM a.r.g.
   2016 - JO3RI - STG

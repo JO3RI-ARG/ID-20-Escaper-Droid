@@ -68,7 +68,7 @@ void stateGameNextRoom()
     {
       player.steps = 0;
       bitClear (player.characteristics, 6);
-      gameState = STATE_GAME_PLAYING;
+      statePrepForRoom();
     }
   }
   drawHUD();
@@ -76,8 +76,7 @@ void stateGameNextRoom()
 
 void stateGameNextLevel()
 {
-  level++;
-  if (level > AMOUNT_OF_LEVELS)
+  if (level > (sizeof (levels)/2))
   {
     loadAndFillMessage(3);
     addNumber(scorePlayer,24,6);
@@ -92,10 +91,7 @@ void stateGameNextLevel()
     player.y = translateTileToY (player.isOnTile) + currentRoomY ;
     buildRooms(level);
     enterRoom(currentRoom, level);
-    setTicker = TEXT_BLINK;
-    loadAndFillMessage(4);
-    addNumber(level,9,2);
-    addNumber(scorePlayer,23,6);
+    statePrepForPause();
     gameState = STATE_GAME_PAUSE;
   }
 }
@@ -108,10 +104,7 @@ void stateGamePause()
   drawHUD();
   if (arduboy.justPressed(A_BUTTON | B_BUTTON))
   {
-    loadAndFillMessage(7);
-    setTicker = TEXT_SCROLL_RIGHT;
-    showTicker = TRUE;
-    gameState = STATE_GAME_PLAYING;
+    statePrepForRoom();
   }
 }
 

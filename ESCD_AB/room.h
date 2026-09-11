@@ -255,6 +255,7 @@ bool checkIfOnCenterTile(byte coX, byte coY)
 
 void enterRoom(byte roomNumber, byte currentLevel)
 {
+  
   playerShot.active = false;
   enemyBulletActive = false;
   objectHiddenThisVisit = false;
@@ -364,8 +365,8 @@ void drawWallSegments()
 {
   for (byte x = 0; x < 6; x++)
   {
-    sprites.drawSelfMasked( -2 + (10 * x), currentRoomY + 25 - (5 * x), wallParts, NORTH);
-    sprites.drawSelfMasked(60 + (10 * x), currentRoomY + (5 * x), wallParts, EAST);
+    sprites.drawSelfMasked( -2 + (10 * x), currentRoomY + 25 - (5 * x), wallPartsV3, NORTH+(2));
+    sprites.drawSelfMasked(60 + (10 * x), currentRoomY + (5 * x), wallPartsV3, EAST+(2));
   }
 }
 
@@ -379,7 +380,7 @@ void drawTicker(byte setTicker)
     {
       for (byte z = 0; z < 2; z++)
       {
-        sprites.drawSelfMasked(x, currentRoomY + 38 - y + tickerScroll, letterPartsNew, charBox[x]);
+        sprites.drawSelfMasked(x, currentRoomY + 38 - y, letterPartsNew, charBox[x]);
         x++;
       }
       (w < 29) ? y++ : y--;
@@ -408,25 +409,11 @@ void drawTicker(byte setTicker)
           charBox[0] = tempChar;
         }
         break;
-      case TEXT_SCROLL_UP:
-      case TEXT_BLINK_SCROLL_UP:
-        if (tickerScroll > -6) tickerScroll--;
-        else tickerScroll = 6;
-        break;
-      case TEXT_SCROLL_DOWN:
-      case TEXT_BLINK_SCROLL_DOWN:
-        if (tickerScroll < 6) tickerScroll++;
-        else tickerScroll = -6;
-        break;
     }
   }
 
   // blink: hide the text every other 16 frames
   if (bitRead(setTicker, 5) && showMask) { /* drawn already; mask is separate */ }
-
-  // vertical motion pokes through the isometric walls — redraw them on top
-  if (bitRead(setTicker, 3) || bitRead(setTicker, 4))
-    drawWallSegments();
 }
 
 void drawWalls()

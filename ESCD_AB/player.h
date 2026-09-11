@@ -142,7 +142,6 @@ void updatePlayer()
     currentRoomY = ROOM_DRAWING_OFFSET;
     loadAndFillMessage(5);
     addNumber(scorePlayer,22,6);
-    tickerScroll = 0;
     setTicker = TEXT_SCROLL_LEFT;
     showTicker = TRUE;
     player.x = 51;
