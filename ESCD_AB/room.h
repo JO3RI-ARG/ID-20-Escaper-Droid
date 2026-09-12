@@ -124,15 +124,26 @@ struct Room {
 
 Room stageRoom[MAX_AMOUNT_OF_ROOMS];
 
+// one PROGMEM lookup for the current 1-based level
+byte lvByte(byte idx)
+{
+  return pgm_read_byte(&levels[level - LEVEL_OFFSET][idx]);
+}
+
+byte roomByte(byte roomNumber, byte offset)
+{
+  return lvByte(ROOMS_DATA_START_AT_BYTE + (BYTES_USED_FOR_EVERY_ROOM * roomNumber) + offset);
+}
 
 void buildRooms(byte currentLevel)
 {
+  (void)currentLevel; // always the global `level`
   // let's read out in witch room the exit to the next level is
-  exitRoomLocation = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][LEVEL_ROOM_DATA_START_AT_BYTE]);
+  exitRoomLocation = lvByte(LEVEL_ROOM_DATA_START_AT_BYTE);
 
-  byte amountOfRooms = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][AMOUNT_OF_ROOMS_AT_BYTE]);
+  byte amountOfRooms = lvByte(AMOUNT_OF_ROOMS_AT_BYTE);
   int transportDataAtByte = ROOMS_DATA_START_AT_BYTE + (BYTES_USED_FOR_EVERY_ROOM * amountOfRooms);
-  int influenceDataAtByte = transportDataAtByte + pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][AMOUNT_OF_TRANSPORTERS_AT_BYTE]);
+  int influenceDataAtByte = transportDataAtByte + lvByte(AMOUNT_OF_TRANSPORTERS_AT_BYTE);
   byte transporterCounter = 0;
   byte influenceDataCounter = 0;
   // start reading the data out off PROGMEM
@@ -143,32 +154,34 @@ void buildRooms(byte currentLevel)
 
     // now lets set all the data for each room in the current level from the datasheet
     // first set all the doors and if those are closed or open
-    stageRoom[roomNumber].doorsClosedActive = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ROOMS_DATA_START_AT_BYTE + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]);
+    stageRoom[roomNumber].doorsClosedActive = roomByte(roomNumber, 0);
 
     // Second thing to do is to set the 8 elements active or inactive in each room (2 enemies, an object and 5 special floor tiles)
     for (byte i = 0; i < 8; i++)
     {
-      if (pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + i + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]))
+      if (roomByte(roomNumber, 5 + i))
       { //0b76543210
         bitSet (stageRoom[roomNumber].elementsActive, 7 - i);    //0b12345678
       }
     }
 
+    byte objType = roomByte(roomNumber, 5 + OBJECT) & 0b00000111;
+
     // Third thing to do is to set the transporter data in the correct room
-    if ((pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + OBJECT + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]) & 0b00000111) == TELEPORT)
+    if (objType == TELEPORT)
     {
-      stageRoom[roomNumber].roomToTransportTo = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][transportDataAtByte + transporterCounter]);
+      stageRoom[roomNumber].roomToTransportTo = lvByte(transportDataAtByte + transporterCounter);
       transporterCounter++;
     }
     // Fourth thing to do is to set in which room an element is influenced, where the influencer is and what elementes are influenced
-    if ((pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + OBJECT + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]) & 0b00000111) > TELEPORT)
+    if (objType > TELEPORT)
     {
       // influence record is 2 bytes: target room, element mask
       // (the old middle "from room" byte was unused and has been removed)
-      stageRoom[roomNumber].roomNumberInfluencing = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][influenceDataAtByte + influenceDataCounter]);
-      stageRoom[roomNumber].elementsInfluenced = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][influenceDataAtByte + influenceDataCounter + 1]);
+      stageRoom[roomNumber].roomNumberInfluencing = lvByte(influenceDataAtByte + influenceDataCounter);
+      stageRoom[roomNumber].elementsInfluenced = lvByte(influenceDataAtByte + influenceDataCounter + 1);
       influenceDataCounter += 2;
-      if ((pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + OBJECT + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]) & 0b00000111) == SWITCH_ON)
+      if (objType == SWITCH_ON)
         bitSet(stageRoom[roomNumber].roomNumberFromInfluencer, 7);
     }
   }
@@ -177,7 +190,7 @@ void buildRooms(byte currentLevel)
 
 byte checkIfLevelDoor()
 {
-  byte test = pgm_read_byte(&levels[level-LEVEL_OFFSET][LEVEL_DOOR_DATA_START_AT_BYTE]);
+  byte test = lvByte(LEVEL_DOOR_DATA_START_AT_BYTE);
   if (currentRoom == ((test & 0b1111100)>>2)) return (test & 0b00000011);
 }
 
@@ -264,8 +277,9 @@ void enterRoom(byte roomNumber, byte currentLevel)
     elements[i].characteristics = 0;
     if (bitRead (stageRoom[roomNumber].elementsActive, 7 - i))
     {
-      byte currentTile = (pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + i + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)])) >> 3;
-      elements[i].characteristics = ((pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + i + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)])));
+      byte b = roomByte(roomNumber, 5 + i);
+      byte currentTile = b >> 3;
+      elements[i].characteristics = b;
       if (currentTile > 24) elements[i].characteristics = 0;
       elements[i].x = translateTileToX(currentTile);
       elements[i].y = translateTileToY(currentTile);
@@ -288,17 +302,19 @@ byte transportToRoom (byte roomNumber)
 
 byte goToRoom(byte roomNumber, byte currentLevel)
 {
+  (void)currentLevel;
   // we know which door the player goes through by the direction the droid is facing
   byte door = player.characteristics & 0b00000011;
-  return (pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][DOORS_DATA_START_AT_BYTE + door + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]) >> 2);
+  return roomByte(roomNumber, 1 + door) >> 2;
 };
 
 
 byte goToTile(byte roomNumber, byte currentLevel)
 {
+  (void)currentLevel;
   // we know which door the player goes through by the direction the droid is facing
   byte door = player.characteristics & 0b00000011;
-  byte doorGoingTo = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][DOORS_DATA_START_AT_BYTE + door + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]) & 0b00000011;
+  byte doorGoingTo = roomByte(roomNumber, 1 + door) & 0b00000011;
   switch (doorGoingTo)
   {
     case NORTH:
@@ -349,10 +365,16 @@ void drawFloor()
   {
     for (byte x = 0; x < 5; x++)
     {
-      if (x==2 && y == 2 && currentRoom == exitRoomLocation) 
+      byte tile = y * 5 + x;
+      // title screen: cheapest black tiles — skip draw (framebuffer is already cleared)
+      // 5-9, 11, 16, 21
+      if (gameState < STATE_GAME_PLAYING)
       {
-        // byte test = pgm_read_byte(&levels[currentLevel - LEVEL_OFFSET][ELEMENTS_DATA_START_AT_BYTE + i + (BYTES_USED_FOR_EVERY_ROOM * roomNumber)]);
-        // find in wath room the level exit is and only draw that there
+        if ((tile > 5 && tile <= 9) || tile == 11 || tile == 16 || tile == 21)
+          continue;
+      }
+      if (x==2 && y == 2 && currentRoom == exitRoomLocation && gameState >= STATE_GAME_PLAYING) 
+      {
         if ((arduboy.everyXFrames(8))) levelUpAnimation = (++levelUpAnimation % 3);
         sprites.drawPlusMask(48 - (12 * x) + (12 * y), currentRoomY + 27 + (6 * x) + (6 * y), floorTile_plus_mask, 5 + levelUpAnimation);
       }
@@ -490,49 +512,29 @@ void drawRoom()
 }
 
 
+// door z-slots: lintel, big-post, GAP, small-post, closed  — do not move the GAP
+PROGMEM const byte doorSlot[] = { 0, 5, 35, 40 };
+
 void checkOrderOfObjects(byte roomNumber, byte currentLevel)
 {
+  (void)roomNumber;
+  (void)currentLevel;
   // clear out the itemsOrder
   memset(itemsOrder, EMPTY_PLACE, SIZE_OF_ITEMSORDER);
 
-  //draw door NORTH
-  if (bitRead(stageRoom[currentRoom].doorsClosedActive, NORTH_DOOR_EXISTS))
+  byte doors = stageRoom[currentRoom].doorsClosedActive;
+  for (byte d = 0; d < 4; d++)
   {
-    itemsOrder[0] = NORTH_LINTEL;
-    itemsOrder[1] = NORTH_BIG_POST;
-    itemsOrder[3] = NORTH_SMALL_POST;
+    byte base = pgm_read_byte(&doorSlot[d]);
+    byte id   = NORTH_LINTEL + (d << 2);
+    if (bitRead(doors, d + 4))
+    {
+      itemsOrder[base    ] = id;
+      itemsOrder[base + 1] = id + 1;
+      itemsOrder[base + 3] = id + 2;
+    }
+    if (bitRead(doors, d)) itemsOrder[base + 4] = id + 3;
   }
-  if (bitRead(stageRoom[currentRoom].doorsClosedActive, NORTH_DOOR_IS_CLOSSED)) itemsOrder[4] = NORTH_DOOR_CLOSSED;
-
-
-  //draw door EAST
-  if (bitRead(stageRoom[currentRoom].doorsClosedActive, EAST_DOOR_EXISTS))
-  {
-    itemsOrder[5] = EAST_LINTEL;
-    itemsOrder[6] = EAST_BIG_POST;
-    itemsOrder[8] = EAST_SMALL_POST;
-  }
-  if (bitRead(stageRoom[currentRoom].doorsClosedActive, EAST_DOOR_IS_CLOSSED)) itemsOrder[9] = EAST_DOOR_CLOSSED;
-
-
-  //draw door SOUTH
-  if (bitRead(stageRoom[currentRoom].doorsClosedActive, SOUTH_DOOR_EXISTS))
-  {
-    itemsOrder[35] = SOUTH_LINTEL;
-    itemsOrder[36] = SOUTH_BIG_POST;
-    itemsOrder[38] = SOUTH_SMALL_POST;
-  }
-  if (bitRead(stageRoom[currentRoom].doorsClosedActive, SOUTH_DOOR_IS_CLOSSED)) itemsOrder[39] = SOUTH_DOOR_CLOSSED;
-
-
-  //draw door WEST
-  if (bitRead(stageRoom[currentRoom].doorsClosedActive, WEST_DOOR_EXISTS))
-  {
-    itemsOrder[40] = WEST_LINTEL;
-    itemsOrder[41] = WEST_BIG_POST;
-    itemsOrder[43] = WEST_SMALL_POST;
-  }
-  if (bitRead(stageRoom[currentRoom].doorsClosedActive, WEST_DOOR_IS_CLOSSED)) itemsOrder[44] = WEST_DOOR_CLOSSED;
 
 
   //******************************

@@ -57,7 +57,7 @@
 #define FALSE                        0
 #define TRUE                         1
 
-#define ROOM_DRAWING_OFFSET           -9
+#define ROOM_DRAWING_OFFSET          -3
 
 // globals ///////////////////////////////////////////////////////////////////
 

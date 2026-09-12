@@ -60,7 +60,8 @@ PROGMEM const char textMessage[] = // each message max 30 characters including s
 
 void loadAndFillMessage(uint8_t indexMessage)
 {
-  memset(charBox, 0, sizeof(charBox));
+  //memset(charBox, 0, sizeof(charBox));
+  for (byte i=0;i<sizeof(charBox);i++)charBox[i] = 0;
 
   // Find the start of the requested message
   const char* msg = textMessage;

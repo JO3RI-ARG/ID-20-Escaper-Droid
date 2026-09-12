@@ -14,8 +14,6 @@
 #define ELEMENTS_DATA_START_AT_BYTE               ROOMS_DATA_START_AT_BYTE + 5            
 #define BYTES_USED_FOR_EVERY_ROOM                 13
 
-//#define AMOUNT_OF_LEVELS                          5 //this is now calculated
-
 // ROOM ORDER OF TILES
 //                 /\
 //                /  \
@@ -191,8 +189,8 @@ const unsigned char PROGMEM level00[] =
   0b00000000, // T0
   0b00000011, // T1
 
-  // influence: in-room, switch-room, mask
-  0b00000001, 0b00000101, 0b00011111, // I0
+  // influence: 2 bytes — target room, mask
+  0b00000001, 0b00011111,
 };
 
 
@@ -274,7 +272,9 @@ const unsigned char PROGMEM level04[] =
 
 const unsigned char *levels[] =
 {
-  level01, level02, level03, level04, level00,
+  level00, level01, level02, level03, level04
 };
+
+#define AMOUNT_OF_LEVELS  (sizeof(levels) / sizeof(levels[0]))
 
 #endif

@@ -54,18 +54,18 @@ void stateMenuIntro()
 void stateMenuMain()
 {
   drawTitleScreen();
+  drawFloor();
+
+
   drawSelectedWordMask(pgm_read_byte(&menuWordX[menuSelection]));
+
   if (arduboy.everyXFrames(26)) danceDroid = !danceDroid;
+
   sprites.drawPlusMask(51, 9+SET_THE_DANCERS_Y, droid_plus_mask, 2+danceDroid);
 
-  //sprites.drawPlusMask(39, 15+SET_THE_DANCERS_Y, enemies_plus_mask, 2+danceDroid);
   sprites.drawPlusMask(27, 21+SET_THE_DANCERS_Y, enemies_plus_mask, 6+danceDroid);
-  //sprites.drawPlusMask(15, 27+SET_THE_DANCERS_Y, enemies_plus_mask, 10+danceDroid);
   sprites.drawPlusMask(3, 33+SET_THE_DANCERS_Y, enemies_plus_mask, 14+danceDroid);
-
-  //sprites.drawPlusMask(63, 15+SET_THE_DANCERS_Y, enemies_plus_mask, 2+danceDroid);
   sprites.drawPlusMask(75, 21+SET_THE_DANCERS_Y, enemies_plus_mask, 2+danceDroid);
-  //sprites.drawPlusMask(87, 27+SET_THE_DANCERS_Y, enemies_plus_mask, 10+danceDroid);
   sprites.drawPlusMask(99, 33+SET_THE_DANCERS_Y, enemies_plus_mask, 10+danceDroid);
 
   if (arduboy.justPressed(RIGHT_BUTTON) && (menuSelection < 3)) menuSelection++;
@@ -80,6 +80,7 @@ void stateMenuMain()
 void stateMenuConf()
 {
   drawTitleScreen();
+  drawFloor();
   // " BUTTON SCHEME    N<>S  E<>W"  N<>S @ char 18 → x72, E<>W @ char 24 → x96
   drawSelectedWordMask(buttonSchemeOffset ? 96 : 72);
   if (arduboy.justPressed(RIGHT_BUTTON)) buttonSchemeOffset = 4;
@@ -93,6 +94,7 @@ void stateMenuConf()
 void stateMenuInfo()
 {
   drawTitleScreen();
+  drawFloor();
   setTicker = TEXT_SCROLL_LEFT;
   if (arduboy.justPressed(A_BUTTON | B_BUTTON))
   {
@@ -103,6 +105,7 @@ void stateMenuInfo()
 void stateMenuSdfx()
 {
   drawTitleScreen();
+  drawFloor();
   // " MUSIC SOUND       ON   OFF"  ON @ char 19 → x76, OFF @ char 24 → x96
   drawSelectedWordMask(arduboy.audio.enabled() ? 76 : 96);
   if (arduboy.justPressed(LEFT_BUTTON)) arduboy.audio.on();
